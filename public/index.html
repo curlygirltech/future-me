@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Future Me — Your AI Coach</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+
+    :root {
+      --bg: #0e0e14;
+      --surface: #16161f;
+      --surface2: #1e1e2a;
+      --border: #2a2a3a;
+      --accent: #a78bfa;
+      --accent2: #f0abfc;
+      --text: #e8e8f0;
+      --text-muted: #8888aa;
+      --user-bubble: #312060;
+      --ai-bubble: #1a1a28;
+      --success: #6ee7b7;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── SETUP SCREEN ─────────────────────────────────────── */
+    #setup-screen {
+      width: 100%;
+      max-width: 640px;
+      padding: 32px 24px 48px;
+    }
+
+    .setup-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .setup-header .eyebrow {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .setup-header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 38px;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #e8e8f0 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .setup-header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .steps-nav {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+
+    .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s;
+    }
+    .step-dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
+    .step-dot.done { background: var(--success); }
+
+    .step-panel { display: none; }
+    .step-panel.active { display: block; }
+
+    .step-title {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .field { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    label span { color: var(--accent2); }
+
+    input, textarea, select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+
+    select option { background: var(--surface2); }
+
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+
+    .milestones-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .milestone-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .milestone-card label {
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .milestone-card input {
+      border: none;
+      background: transparent;
+      padding: 4px 0;
+      font-size: 13px;
+    }
+    .milestone-card input:focus { border: none; }
+
+    .nav-buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border-radius: 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: var(--border); color: var(--text); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-launch {
+      background: linear-gradient(135deg, #7c3aed, #c026d3);
+      color: white;
+      font-size: 16px;
+      padding: 16px;
+    }
+    .btn-launch:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.4); }
+
+    .api-note {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .api-note strong { color: var(--accent); }
+    .api-note p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 4px; }
+    .api-note a { color: var(--accent2); text-decoration: none; }
+    .api-note a:hover { text-decoration: underline; }
+
+    /* ── CHAT SCREEN ──────────────────────────────────────── */
+    #chat-screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      max-width: 720px;
+      height: 100vh;
+      max-height: 100vh;
+    }
+
+    .chat-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7c3aed, #c026d3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .chat-header-info { flex: 1; }
+    .chat-header-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .chat-header-sub {
+      font-size: 12px;
+      color: var(--success);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+    .icon-btn:hover { background: var(--border); color: var(--text); }
+
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      scroll-behavior: smooth;
+    }
+
+    .messages-area::-webkit-scrollbar { width: 4px; }
+    .messages-area::-webkit-scrollbar-track { background: transparent; }
+    .messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+      animation: fadeSlideIn 0.3s ease;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .message.ai .message-avatar {
+      background: linear-gradient(135deg, #7c3aed, #c026d3);
+    }
+
+    .message.user .message-avatar {
+      background: var(--user-bubble);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
+    .bubble {
+      padding: 13px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .message.ai .bubble {
+      background: var(--ai-bubble);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+    }
+
+    .message.user .bubble {
+      background: var(--user-bubble);
+      border: 1px solid #4a2090;
+      border-top-right-radius: 4px;
+      color: #e0d8ff;
+    }
+
+    .bubble p { margin-bottom: 10px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble strong { color: var(--accent2); }
+    .bubble ul, .bubble ol { padding-left: 18px; margin: 8px 0; }
+    .bubble li { margin-bottom: 4px; }
+
+    .typing-indicator {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 14px 16px;
+    }
+    .typing-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: bounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    .quick-actions {
+      padding: 12px 20px 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .quick-btn {
+      padding: 7px 13px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .quick-btn:hover {
+      background: var(--border);
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .input-area {
+      padding: 14px 20px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    #chat-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      resize: none;
+      max-height: 120px;
+      line-height: 1.5;
+      transition: border-color 0.2s;
+    }
+    #chat-input:focus { border-color: var(--accent); }
+    #chat-input::placeholder { color: var(--text-muted); }
+
+    #send-btn {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    #send-btn:hover { filter: brightness(1.1); transform: scale(1.05); }
+    #send-btn:disabled { opacity: 0.4; transform: none; cursor: not-allowed; }
+
+    .error-banner {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.4);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #fca5a5;
+      margin: 0 20px 12px;
+    }
+
+    .welcome-card {
+      text-align: center;
+      padding: 32px 20px;
+    }
+    .welcome-card .big-emoji { font-size: 48px; margin-bottom: 16px; }
+    .welcome-card h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    .welcome-card p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════ SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-header">
+    <div class="eyebrow">✦ Your AI Life Coach</div>
+    <h1>Meet Your<br/>Future Self</h1>
+    <p>Build a personalized AI coach who already lives the life you're working toward.</p>
+  </div>
+
+  <div class="steps-nav">
+    <div class="step-dot active" id="dot-0"></div>
+    <div class="step-dot" id="dot-1"></div>
+    <div class="step-dot" id="dot-2"></div>
+    <div class="step-dot" id="dot-3"></div>
+  </div>
+
+  <!-- STEP 0: API Key -->
+  <div class="step-panel active" id="step-0">
+    <div class="step-title">Step 1 of 4 — Connect to Claude</div>
+    <div class="api-note">
+      <strong>You'll need a free Anthropic API key.</strong>
+      <p>Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → "API Keys" → "Create Key". Your key stays in your browser only and is never stored anywhere.</p>
+    </div>
+    <div class="field">
+      <label>Anthropic API Key</label>
+      <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off" />
+      <div class="hint">Starts with "sk-ant-..." — stored locally in your browser session only.</div>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="nextStep(0)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 1: The Basics -->
+  <div class="step-panel" id="step-1">
+    <div class="step-title">Step 2 of 4 — The Basics</div>
+    <div class="field">
+      <label>Your first name <span>*</span></label>
+      <input type="text" id="name" placeholder="e.g. Naya" />
+    </div>
+    <div class="field">
+      <label>Your big, specific goal <span>*</span></label>
+      <textarea id="goal" rows="2" placeholder='e.g. "Earn $100K from my freelance business and quit my 9-5 by December 2026"'></textarea>
+      <div class="hint">Be specific. Not "make more money" — the more precise, the better your coach.</div>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Target date</label>
+        <input type="text" id="timeline" placeholder="e.g. December 2026" />
+      </div>
+      <div class="field">
+        <label>Your coach's name</label>
+        <input type="text" id="coach-name" placeholder="e.g. Future Naya" />
+        <div class="hint">Will auto-fill as "Future [Name]"</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Your "why" — why does this goal matter to you?</label>
+      <textarea id="why" rows="2" placeholder="e.g. I want creative freedom, to stop building someone else's dream, and to travel without asking for PTO"></textarea>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-ghost" onclick="prevStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="nextStep(1)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: About You -->
+  <div class="step-panel" id="step-2">
+    <div class="step-title">Step 3 of 4 — About You</div>
+    <div class="field">
+      <label>Your current situation</label>
+      <textarea id="current-situation" rows="2" placeholder="e.g. Marketing coordinator at a mid-size company, doing design work on the side"></textarea>
+    </div>
+    <div class="field">
+      <label>Past wins you're proud of (one per line)</label>
+      <textarea id="past-wins" rows="3" placeholder="e.g. Got my first 3 paying clients&#10;Built a portfolio website&#10;Completed a brand identity project I'm really proud of"></textarea>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Your strengths</label>
+        <textarea id="strengths" rows="2" placeholder="e.g. Creativity, attention to detail, building genuine relationships"></textarea>
+      </div>
+      <div class="field">
+        <label>What you struggle with</label>
+        <textarea id="challenges" rows="2" placeholder="e.g. Putting myself out there, pricing my work confidently"></textarea>
+      </div>
+    </div>
+    <div class="field">
+      <label>Non-negotiables (things your coach should always remind you of)</label>
+      <textarea id="non-negotiables" rows="2" placeholder="e.g. Sleep 7+ hours, take Sundays off, drink water, walk daily"></textarea>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-ghost" onclick="prevStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="nextStep(2)">Continue →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Milestones & Style -->
+  <div class="step-panel" id="step-3">
+    <div class="step-title">Step 4 of 4 — Milestones & Coaching Style</div>
+    <div class="field">
+      <label>Quarterly milestones / phases (optional but powerful)</label>
+      <div class="milestones-grid">
+        <div class="milestone-card">
+          <label>Q1 Focus</label>
+          <input type="text" id="q1" placeholder="e.g. Lay the foundation" />
+        </div>
+        <div class="milestone-card">
+          <label>Q2 Focus</label>
+          <input type="text" id="q2" placeholder="e.g. Build momentum" />
+        </div>
+        <div class="milestone-card">
+          <label>Q3 Focus</label>
+          <input type="text" id="q3" placeholder="e.g. Scale up" />
+        </div>
+        <div class="milestone-card">
+          <label>Q4 Focus</label>
+          <input type="text" id="q4" placeholder="e.g. Hit the finish line" />
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Coaching tone / style</label>
+      <select id="tone">
+        <option value="warm and direct, like a supportive big sister who won't let you quit">Warm & Direct (Supportive big sister energy)</option>
+        <option value="calm and focused, like a seasoned executive coach">Calm & Focused (Executive coach)</option>
+        <option value="hype and energetic, like an enthusiastic best friend who believes in you completely">Hype & Energetic (Enthusiastic best friend)</option>
+        <option value="honest and no-nonsense, but always rooting for you">No-Nonsense (Real talk, always rooting for you)</option>
+        <option value="gentle and nurturing, like a wise mentor who leads with kindness">Gentle & Nurturing (Wise mentor)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Anything else your coach should know about you? (optional)</label>
+      <textarea id="extra" rows="2" placeholder="e.g. I live in Austin and love coffee shops, yoga, and my dog Benny. I tend to overthink things."></textarea>
+    </div>
+    <div class="nav-buttons">
+      <button class="btn btn-ghost" onclick="prevStep(3)">← Back</button>
+      <button class="btn btn-launch" onclick="launch()">✨ Meet Your Future Self</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ CHAT SCREEN -->
+<div id="chat-screen">
+  <div class="chat-header">
+    <div class="avatar" id="chat-avatar">✦</div>
+    <div class="chat-header-info">
+      <div class="chat-header-name" id="chat-name">Future Me</div>
+      <div class="chat-header-sub">● Ready to coach you</div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑</button>
+      <button class="icon-btn" onclick="resetToSetup()" title="Edit settings">⚙️</button>
+    </div>
+  </div>
+
+  <div class="messages-area" id="messages"></div>
+
+  <div id="error-area"></div>
+
+  <div class="quick-actions" id="quick-actions">
+    <button class="quick-btn" onclick="quickSend('What should I focus on today?')">🎯 What should I focus on today?</button>
+    <button class="quick-btn" onclick="quickSend('Am I on track for my goal?')">📊 Am I on track?</button>
+    <button class="quick-btn" onclick="quickSend('I need some motivation right now.')">⚡ I need motivation</button>
+    <button class="quick-btn" onclick="quickSend('Paint me a picture of my future day once I've reached my goal.')">🌅 Show me my future day</button>
+    <button class="quick-btn" onclick="quickSend('I\\'m feeling stuck. What\\'s one thing I can do in the next 30 minutes?')">⏱ I'm feeling stuck</button>
+  </div>
+
+  <div class="input-area">
+    <textarea id="chat-input" rows="1" placeholder="Talk to your future self…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <button id="send-btn" onclick="sendMessage()">↑</button>
+  </div>
+</div>
+
+<script>
+  let currentStep = 0;
+  let systemPrompt = '';
+  let conversationHistory = [];
+  let userName = '';
+  let coachName = '';
+  let isTyping = false;
+
+  const FIELDS = ['api-key','name','goal','timeline','coach-name','why',
+                  'current-situation','past-wins','strengths','challenges',
+                  'non-negotiables','tone','extra','q1','q2','q3','q4'];
+
+  function saveSetup() {
+    const data = {};
+    FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+    try { localStorage.setItem('futureMeSetup', JSON.stringify(data)); } catch(e) {}
+  }
+
+  function loadSetup() {
+    try {
+      const saved = localStorage.getItem('futureMeSetup');
+      if (!saved) return;
+      const data = JSON.parse(saved);
+      Object.entries(data).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+      });
+    } catch(e) {}
+  }
+
+  window.addEventListener('load', () => {
+    loadSetup();
+    FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', saveSetup);
+      if (el) el.addEventListener('change', saveSetup);
+    });
+  });
+
+  function nextStep(from) {
+    if (from === 0) {
+      const key = document.getElementById('api-key').value.trim();
+      if (!key || !key.startsWith('sk-')) {
+        alert('Please enter a valid Anthropic API key (starts with "sk-").');
+        return;
+      }
+    }
+    if (from === 1) {
+      const name = document.getElementById('name').value.trim();
+      const goal = document.getElementById('goal').value.trim();
+      if (!name || !goal) {
+        alert('Please fill in your name and goal — these are required.');
+        return;
+      }
+    }
+    setStep(from + 1);
+  }
+
+  function prevStep(from) { setStep(from - 1); }
+
+  function setStep(n) {
+    document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    document.querySelectorAll('.step-dot').forEach((d, i) => {
+      d.classList.remove('active', 'done');
+      if (i < n) d.classList.add('done');
+      if (i === n) d.classList.add('active');
+    });
+    currentStep = n;
+  }
+
+  function buildSystemPrompt() {
+    const g = (id) => document.getElementById(id)?.value?.trim() || '';
+
+    userName = g('name');
+    const rawCoachName = g('coach-name');
+    coachName = rawCoachName || `Future ${userName}`;
+    const goal = g('goal');
+    const timeline = g('timeline') || 'my target date';
+    const why = g('why');
+    const situation = g('current-situation');
+    const wins = g('past-wins').split('\n').filter(Boolean).map(w => `- ${w}`).join('\n') || '- (Not specified)';
+    const strengths = g('strengths');
+    const challenges = g('challenges');
+    const nonneg = g('non-negotiables');
+    const tone = g('tone');
+    const extra = g('extra');
+    const q1 = g('q1'), q2 = g('q2'), q3 = g('q3'), q4 = g('q4');
+
+    let milestones = '';
+    if (q1 || q2 || q3 || q4) {
+      milestones = `\nMY QUARTERLY MILESTONES:\n${q1 ? `- Q1: ${q1}\n` : ''}${q2 ? `- Q2: ${q2}\n` : ''}${q3 ? `- Q3: ${q3}\n` : ''}${q4 ? `- Q4: ${q4}\n` : ''}`;
+      milestones += `\nWhen ${userName} asks "am I on track?" or "what phase am I in?", figure out today's approximate quarter and compare their progress to these milestones.`;
+    }
+
+    return `You are ${coachName} — the version of ${userName} who has already achieved: ${goal}. You're speaking to ${userName} from ${timeline} in the future, looking back.
+
+ABOUT ${userName.toUpperCase()}:
+- Current situation: ${situation || 'Not specified'}
+- Past wins they're proud of:
+${wins}
+- Strengths: ${strengths || 'Not specified'}
+- Struggles/challenges: ${challenges || 'Not specified'}
+${extra ? `- Other important context: ${extra}` : ''}
+
+THE GOAL:
+${userName} wants to: ${goal}
+Target date: ${timeline}
+Their "why": ${why || 'Not specified'}
+${milestones}
+
+NON-NEGOTIABLES (always weave these in where relevant):
+${nonneg || 'Rest, health, and self-care.'}
+
+HOW TO SPEAK TO ${userName.toUpperCase()}:
+- Tone: ${tone}
+- Be specific — never say "work on your project," say exactly WHAT to do
+- Remind them of their past wins when they're doubting themselves
+- Hold them accountable if they keep avoiding the same thing
+- Celebrate ALL progress, even tiny wins
+- You remember how hard this journey was. You've lived it.
+
+WHEN ASKED "WHAT SHOULD I FOCUS ON TODAY?" OR "WHAT SHOULD I DO TODAY?":
+1. Acknowledge where they are in their journey
+2. Give exactly 3 specific, actionable tasks with rough time estimates
+3. Include one wellness/self-care reminder
+4. Close with warm encouragement in your voice — make it feel personal, not generic
+
+WHEN THEY NEED MOTIVATION:
+- Remind them WHY they started
+- List 2-3 of their past wins as proof they can do this
+- Paint a vivid, specific picture of life once the goal is achieved
+- Give ONE action they can take in the next 30 minutes
+
+WHEN THEY FEEL STUCK:
+- Acknowledge the feeling first (don't skip past it)
+- Ask one clarifying question or identify what's really blocking them
+- Give one tiny, doable next step
+
+WHEN ASKED TO "SHOW MY FUTURE DAY" OR "PAINT MY FUTURE":
+Write a vivid, immersive, first-person description of a perfect day in ${userName}'s life after achieving the goal. Make it feel real — specific time of day, sensory details, emotions. Reference their actual goal and context.
+
+FORMATTING RULES:
+- Use line breaks generously for readability
+- Bold (**like this**) key action items or important reminders
+- Keep responses focused — don't overwhelm with walls of text
+- Use a conversational, flowing tone — not bullet points unless listing tasks
+
+Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.`;
+  }
+
+  function launch() {
+    systemPrompt = buildSystemPrompt();
+    coachName = document.getElementById('coach-name').value.trim() || `Future ${document.getElementById('name').value.trim()}`;
+    userName = document.getElementById('name').value.trim();
+
+    document.getElementById('chat-name').textContent = coachName;
+    document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
+
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('chat-screen').style.display = 'flex';
+
+    sendOpeningMessage();
+  }
+
+  async function sendOpeningMessage() {
+    await sendToAPI("Hello! Introduce yourself and ask me what I need today.", true);
+  }
+
+  function quickSend(text) {
+    document.getElementById('chat-input').value = text;
+    sendMessage();
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || isTyping) return;
+    input.value = '';
+    input.style.height = 'auto';
+    await sendToAPI(text, false);
+  }
+
+  async function sendToAPI(userText, isHidden) {
+    if (isTyping) return;
+    isTyping = true;
+    document.getElementById('send-btn').disabled = true;
+    clearError();
+
+    if (!isHidden) {
+      appendMessage('user', userText);
+    }
+
+    conversationHistory.push({ role: 'user', content: userText });
+
+    const typingEl = appendTyping();
+
+    try {
+      const apiKey = document.getElementById('api-key').value.trim();
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          apiKey,
+          system: systemPrompt,
+          messages: conversationHistory
+        })
+      });
+
+      typingEl.remove();
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `API error ${response.status}`);
+      }
+
+      const data = await response.json();
+      const reply = data.content?.[0]?.text || '(No response)';
+
+      conversationHistory.push({ role: 'assistant', content: reply });
+      appendMessage('ai', reply);
+
+    } catch (err) {
+      typingEl.remove();
+      showError(err.message);
+    }
+
+    isTyping = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('chat-input').focus();
+  }
+
+  function appendMessage(role, text) {
+    const area = document.getElementById('messages');
+    const el = document.createElement('div');
+    el.className = `message ${role}`;
+
+    const avatarEl = document.createElement('div');
+    avatarEl.className = 'message-avatar';
+    avatarEl.textContent = role === 'ai' ? '✦' : userName.charAt(0).toUpperCase();
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.innerHTML = formatText(text);
+
+    el.appendChild(avatarEl);
+    el.appendChild(bubble);
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+    return el;
+  }
+
+  function appendTyping() {
+    const area = document.getElementById('messages');
+    const el = document.createElement('div');
+    el.className = 'message ai';
+
+    const avatarEl = document.createElement('div');
+    avatarEl.className = 'message-avatar';
+    avatarEl.textContent = '✦';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble typing-indicator';
+    bubble.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+
+    el.appendChild(avatarEl);
+    el.appendChild(bubble);
+    area.appendChild(el);
+    area.scrollTop = area.scrollHeight;
+    return el;
+  }
+
+  function formatText(text) {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br/>')
+      .replace(/^/, '<p>')
+      .replace(/$/, '</p>');
+  }
+
+  function clearError() {
+    document.getElementById('error-area').innerHTML = '';
+  }
+
+  function showError(msg) {
+    const isServerDown = msg.includes('fetch') || msg.includes('NetworkError') || msg.includes('Failed');
+    const hint = isServerDown
+      ? 'The local server isn\'t running. Open Terminal, drag <strong>server.py</strong> into it, and press Enter. Then try again.'
+      : 'Check your API key at <a href="https://console.anthropic.com" target="_blank" style="color:#f0abfc">console.anthropic.com</a>';
+    document.getElementById('error-area').innerHTML = `
+      <div class="error-banner">
+        ⚠️ <strong>${isServerDown ? 'Server not running' : 'Something went wrong'}:</strong> ${isServerDown ? '' : msg}
+        <br/><small>${hint}</small>
+      </div>`;
+  }
+
+  function clearChat() {
+    if (!confirm('Clear this conversation and start fresh?')) return;
+    conversationHistory = [];
+    document.getElementById('messages').innerHTML = '';
+    sendOpeningMessage();
+  }
+
+  function resetToSetup() {
+    if (!confirm('Go back to settings? Your conversation will be cleared.')) return;
+    conversationHistory = [];
+    document.getElementById('messages').innerHTML = '';
+    document.getElementById('chat-screen').style.display = 'none';
+    document.getElementById('setup-screen').style.display = 'block';
+  }
+</script>
+</body>
+</html>
+

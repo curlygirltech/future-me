@@ -6,9 +6,14 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { apiKey, system, messages } = req.body;
+  const { accessPassword, system, messages } = req.body;
 
-  if (!apiKey) return res.status(400).json({ error: 'API key required' });
+  if (!process.env.ACCESS_PASSWORD || accessPassword !== process.env.ACCESS_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Server misconfigured' });
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -32,4 +37,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 }
-

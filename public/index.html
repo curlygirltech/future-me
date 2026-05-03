@@ -33,6 +33,80 @@
       justify-content: center;
     }
 
+    /* ── PASSWORD GATE ─────────────────────────────────────── */
+    #password-gate {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gate-box {
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+      padding: 32px 24px;
+    }
+
+    .gate-icon { font-size: 36px; margin-bottom: 16px; }
+
+    .gate-box h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #e8e8f0 0%, var(--accent2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gate-box p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    #gate-password {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+    }
+    #gate-password:focus { border-color: var(--accent); }
+
+    #gate-error {
+      color: #fca5a5;
+      font-size: 13px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    #gate-submit {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    #gate-submit:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
     /* ── SETUP SCREEN ─────────────────────────────────────── */
     #setup-screen {
       width: 100%;
@@ -201,18 +275,6 @@
       padding: 16px;
     }
     .btn-launch:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.4); }
-
-    .api-note {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 20px;
-    }
-    .api-note strong { color: var(--accent); }
-    .api-note p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin-top: 4px; }
-    .api-note a { color: var(--accent2); text-decoration: none; }
-    .api-note a:hover { text-decoration: underline; }
 
     /* ── CHAT SCREEN ──────────────────────────────────────── */
     #chat-screen {
@@ -452,21 +514,22 @@
       color: #fca5a5;
       margin: 0 20px 12px;
     }
-
-    .welcome-card {
-      text-align: center;
-      padding: 32px 20px;
-    }
-    .welcome-card .big-emoji { font-size: 48px; margin-bottom: 16px; }
-    .welcome-card h2 {
-      font-family: 'DM Serif Display', serif;
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    .welcome-card p { color: var(--text-muted); font-size: 14px; line-height: 1.6; }
   </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════ PASSWORD GATE -->
+<div id="password-gate">
+  <div class="gate-box">
+    <div class="gate-icon">✦</div>
+    <h2>Future Me</h2>
+    <p>Enter your access password to continue.</p>
+    <input type="password" id="gate-password" placeholder="Password"
+           onkeydown="if(event.key==='Enter') submitPassword()" />
+    <div id="gate-error">Incorrect password. Try again.</div>
+    <button id="gate-submit" onclick="submitPassword()">Enter →</button>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════ SETUP SCREEN -->
 <div id="setup-screen">
@@ -480,29 +543,11 @@
     <div class="step-dot active" id="dot-0"></div>
     <div class="step-dot" id="dot-1"></div>
     <div class="step-dot" id="dot-2"></div>
-    <div class="step-dot" id="dot-3"></div>
   </div>
 
-  <!-- STEP 0: API Key -->
+  <!-- STEP 0: The Basics -->
   <div class="step-panel active" id="step-0">
-    <div class="step-title">Step 1 of 4 — Connect to Claude</div>
-    <div class="api-note">
-      <strong>You'll need a free Anthropic API key.</strong>
-      <p>Get one at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a> → "API Keys" → "Create Key". Your key stays in your browser only and is never stored anywhere.</p>
-    </div>
-    <div class="field">
-      <label>Anthropic API Key</label>
-      <input type="password" id="api-key" placeholder="sk-ant-api03-..." autocomplete="off" />
-      <div class="hint">Starts with "sk-ant-..." — stored locally in your browser session only.</div>
-    </div>
-    <div class="nav-buttons">
-      <button class="btn btn-primary" onclick="nextStep(0)">Continue →</button>
-    </div>
-  </div>
-
-  <!-- STEP 1: The Basics -->
-  <div class="step-panel" id="step-1">
-    <div class="step-title">Step 2 of 4 — The Basics</div>
+    <div class="step-title">Step 1 of 3 — The Basics</div>
     <div class="field">
       <label>Your first name <span>*</span></label>
       <input type="text" id="name" placeholder="e.g. Naya" />
@@ -528,14 +573,13 @@
       <textarea id="why" rows="2" placeholder="e.g. I want creative freedom, to stop building someone else's dream, and to travel without asking for PTO"></textarea>
     </div>
     <div class="nav-buttons">
-      <button class="btn btn-ghost" onclick="prevStep(1)">← Back</button>
-      <button class="btn btn-primary" onclick="nextStep(1)">Continue →</button>
+      <button class="btn btn-primary" onclick="nextStep(0)">Continue →</button>
     </div>
   </div>
 
-  <!-- STEP 2: About You -->
-  <div class="step-panel" id="step-2">
-    <div class="step-title">Step 3 of 4 — About You</div>
+  <!-- STEP 1: About You -->
+  <div class="step-panel" id="step-1">
+    <div class="step-title">Step 2 of 3 — About You</div>
     <div class="field">
       <label>Your current situation</label>
       <textarea id="current-situation" rows="2" placeholder="e.g. Marketing coordinator at a mid-size company, doing design work on the side"></textarea>
@@ -559,14 +603,14 @@
       <textarea id="non-negotiables" rows="2" placeholder="e.g. Sleep 7+ hours, take Sundays off, drink water, walk daily"></textarea>
     </div>
     <div class="nav-buttons">
-      <button class="btn btn-ghost" onclick="prevStep(2)">← Back</button>
-      <button class="btn btn-primary" onclick="nextStep(2)">Continue →</button>
+      <button class="btn btn-ghost" onclick="prevStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="nextStep(1)">Continue →</button>
     </div>
   </div>
 
-  <!-- STEP 3: Milestones & Style -->
-  <div class="step-panel" id="step-3">
-    <div class="step-title">Step 4 of 4 — Milestones & Coaching Style</div>
+  <!-- STEP 2: Milestones & Style -->
+  <div class="step-panel" id="step-2">
+    <div class="step-title">Step 3 of 3 — Milestones & Coaching Style</div>
     <div class="field">
       <label>Quarterly milestones / phases (optional but powerful)</label>
       <div class="milestones-grid">
@@ -603,7 +647,7 @@
       <textarea id="extra" rows="2" placeholder="e.g. I live in Austin and love coffee shops, yoga, and my dog Benny. I tend to overthink things."></textarea>
     </div>
     <div class="nav-buttons">
-      <button class="btn btn-ghost" onclick="prevStep(3)">← Back</button>
+      <button class="btn btn-ghost" onclick="prevStep(2)">← Back</button>
       <button class="btn btn-launch" onclick="launch()">✨ Meet Your Future Self</button>
     </div>
   </div>
@@ -631,8 +675,8 @@
     <button class="quick-btn" onclick="quickSend('What should I focus on today?')">🎯 What should I focus on today?</button>
     <button class="quick-btn" onclick="quickSend('Am I on track for my goal?')">📊 Am I on track?</button>
     <button class="quick-btn" onclick="quickSend('I need some motivation right now.')">⚡ I need motivation</button>
-    <button class="quick-btn" onclick="quickSend('Paint me a picture of my future day once I've reached my goal.')">🌅 Show me my future day</button>
-    <button class="quick-btn" onclick="quickSend('I\\'m feeling stuck. What\\'s one thing I can do in the next 30 minutes?')">⏱ I'm feeling stuck</button>
+    <button class="quick-btn" onclick="quickSend('Paint me a picture of my future day once I\'ve reached my goal.')">🌅 Show me my future day</button>
+    <button class="quick-btn" onclick="quickSend('I\'m feeling stuck. What\'s one thing I can do in the next 30 minutes?')">⏱ I'm feeling stuck</button>
   </div>
 
   <div class="input-area">
@@ -648,10 +692,61 @@
   let userName = '';
   let coachName = '';
   let isTyping = false;
+  let accessPassword = localStorage.getItem('futureMePassword') || '';
 
-  const FIELDS = ['api-key','name','goal','timeline','coach-name','why',
+  const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
                   'non-negotiables','tone','extra','q1','q2','q3','q4'];
+
+  // ── PASSWORD GATE ───────────────────────────────────────────
+
+  function showPasswordGate(showError) {
+    document.getElementById('password-gate').style.display = 'flex';
+    document.getElementById('gate-error').style.display = showError ? 'block' : 'none';
+    document.getElementById('gate-password').value = '';
+    setTimeout(() => document.getElementById('gate-password').focus(), 50);
+  }
+
+  function submitPassword() {
+    const val = document.getElementById('gate-password').value.trim();
+    if (!val) return;
+    accessPassword = val;
+    localStorage.setItem('futureMePassword', val);
+    document.getElementById('password-gate').style.display = 'none';
+    initApp();
+  }
+
+  // ── APP INIT ────────────────────────────────────────────────
+
+  function initApp() {
+    loadSetup();
+    FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('input', saveSetup);
+      if (el) el.addEventListener('change', saveSetup);
+    });
+    // Auto-resume if setup is already saved
+    try {
+      const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
+      if (saved['name'] && saved['goal']) {
+        launch();
+      }
+    } catch(e) {}
+  }
+
+  window.addEventListener('load', () => {
+    if (!accessPassword) {
+      showPasswordGate(false);
+    } else {
+      initApp();
+    }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    saveCurrentSession();
+  });
+
+  // ── SETUP ───────────────────────────────────────────────────
 
   function saveSetup() {
     const data = {};
@@ -674,35 +769,8 @@
     } catch(e) {}
   }
 
-  window.addEventListener('load', () => {
-    loadSetup();
-    FIELDS.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.addEventListener('input', saveSetup);
-      if (el) el.addEventListener('change', saveSetup);
-    });
-    // Auto-resume if setup is already saved
-    try {
-      const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
-      if (saved['api-key'] && saved['name'] && saved['goal']) {
-        launch();
-      }
-    } catch(e) {}
-  });
-
-  window.addEventListener('beforeunload', () => {
-    saveCurrentSession();
-  });
-
   function nextStep(from) {
     if (from === 0) {
-      const key = document.getElementById('api-key').value.trim();
-      if (!key || !key.startsWith('sk-')) {
-        alert('Please enter a valid Anthropic API key (starts with "sk-").');
-        return;
-      }
-    }
-    if (from === 1) {
       const name = document.getElementById('name').value.trim();
       const goal = document.getElementById('goal').value.trim();
       if (!name || !goal) {
@@ -725,6 +793,8 @@
     });
     currentStep = n;
   }
+
+  // ── SESSION MEMORY ──────────────────────────────────────────
 
   function saveCurrentSession() {
     if (conversationHistory.length === 0) return;
@@ -758,6 +828,8 @@
       return memory;
     } catch(e) { return ''; }
   }
+
+  // ── SYSTEM PROMPT ───────────────────────────────────────────
 
   function buildSystemPrompt() {
     const g = (id) => document.getElementById(id)?.value?.trim() || '';
@@ -839,6 +911,8 @@ FORMATTING RULES:
 Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.${buildMemoryContext()}`;
   }
 
+  // ── CHAT ────────────────────────────────────────────────────
+
   function launch() {
     systemPrompt = buildSystemPrompt();
     coachName = document.getElementById('coach-name').value.trim() || `Future ${document.getElementById('name').value.trim()}`;
@@ -898,18 +972,28 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     const typingEl = appendTyping();
 
     try {
-      const apiKey = document.getElementById('api-key').value.trim();
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          apiKey,
+          accessPassword,
           system: systemPrompt,
           messages: conversationHistory
         })
       });
 
       typingEl.remove();
+
+      if (response.status === 401) {
+        // Wrong or expired password — re-prompt
+        localStorage.removeItem('futureMePassword');
+        accessPassword = '';
+        conversationHistory.pop();
+        isTyping = false;
+        document.getElementById('send-btn').disabled = false;
+        showPasswordGate(true);
+        return;
+      }
 
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
@@ -987,14 +1071,10 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   }
 
   function showError(msg) {
-    const isServerDown = msg.includes('fetch') || msg.includes('NetworkError') || msg.includes('Failed');
-    const hint = isServerDown
-      ? 'The local server isn\'t running. Open Terminal, drag <strong>server.py</strong> into it, and press Enter. Then try again.'
-      : 'Check your API key at <a href="https://console.anthropic.com" target="_blank" style="color:#f0abfc">console.anthropic.com</a>';
     document.getElementById('error-area').innerHTML = `
       <div class="error-banner">
-        ⚠️ <strong>${isServerDown ? 'Server not running' : 'Something went wrong'}:</strong> ${isServerDown ? '' : msg}
-        <br/><small>${hint}</small>
+        ⚠️ <strong>Something went wrong:</strong> ${msg}
+        <br/><small>Check your connection and try again.</small>
       </div>`;
   }
 
@@ -1017,4 +1097,3 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 </script>
 </body>
 </html>
-

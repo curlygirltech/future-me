@@ -957,6 +957,24 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     await sendToAPI(text, false);
   }
 
+  function sanitize(str) {
+    if (typeof str !== 'string') return str;
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+      const code = str.charCodeAt(i);
+      if (code >= 0xD800 && code <= 0xDBFF) {
+        const next = str.charCodeAt(i + 1);
+        if (next >= 0xDC00 && next <= 0xDFFF) { result += str[i] + str[i + 1]; i++; }
+        // lone high surrogate — drop it
+      } else if (code >= 0xDC00 && code <= 0xDFFF) {
+        // lone low surrogate — drop it
+      } else {
+        result += str[i];
+      }
+    }
+    return result;
+  }
+
   async function sendToAPI(userText, isHidden) {
     if (isTyping) return;
     isTyping = true;
@@ -977,8 +995,8 @@ Always open your first message by greeting ${userName} warmly, introducing yours
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           accessPassword,
-          system: systemPrompt,
-          messages: conversationHistory
+          system: sanitize(systemPrompt),
+          messages: conversationHistory.map(m => ({ ...m, content: sanitize(m.content) }))
         })
       });
 

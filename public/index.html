@@ -681,6 +681,17 @@
       if (el) el.addEventListener('input', saveSetup);
       if (el) el.addEventListener('change', saveSetup);
     });
+    // Auto-resume if setup is already saved
+    try {
+      const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
+      if (saved['api-key'] && saved['name'] && saved['goal']) {
+        launch();
+      }
+    } catch(e) {}
+  });
+
+  window.addEventListener('beforeunload', () => {
+    saveCurrentSession();
   });
 
   function nextStep(from) {
@@ -713,6 +724,39 @@
       if (i === n) d.classList.add('active');
     });
     currentStep = n;
+  }
+
+  function saveCurrentSession() {
+    if (conversationHistory.length === 0) return;
+    try {
+      const sessions = JSON.parse(localStorage.getItem('futureMeSessions') || '[]');
+      sessions.push({
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        messages: conversationHistory.slice(0, 20).map(m => ({
+          role: m.role,
+          content: m.content.slice(0, 400)
+        }))
+      });
+      if (sessions.length > 5) sessions.shift();
+      localStorage.setItem('futureMeSessions', JSON.stringify(sessions));
+    } catch(e) {}
+  }
+
+  function buildMemoryContext() {
+    try {
+      const sessions = JSON.parse(localStorage.getItem('futureMeSessions') || '[]');
+      if (sessions.length === 0) return '';
+      let memory = `\n\nPAST SESSION MEMORY — you've spoken with ${userName} before. Here's what was discussed:\n`;
+      sessions.forEach(s => {
+        memory += `\n[${s.date}]\n`;
+        s.messages.forEach(m => {
+          const speaker = m.role === 'user' ? userName : 'You';
+          memory += `${speaker}: ${m.content}\n`;
+        });
+      });
+      memory += `\nDraw on this naturally — reference past wins, struggles, or themes when relevant. Don't announce that you're reading notes; just be present and continuous.`;
+      return memory;
+    } catch(e) { return ''; }
   }
 
   function buildSystemPrompt() {
@@ -792,7 +836,7 @@ FORMATTING RULES:
 - Keep responses focused — don't overwhelm with walls of text
 - Use a conversational, flowing tone — not bullet points unless listing tasks
 
-Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.`;
+Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.${buildMemoryContext()}`;
   }
 
   function launch() {
@@ -956,6 +1000,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
   function clearChat() {
     if (!confirm('Clear this conversation and start fresh?')) return;
+    saveCurrentSession();
     conversationHistory = [];
     document.getElementById('messages').innerHTML = '';
     sendOpeningMessage();
@@ -963,6 +1008,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
   function resetToSetup() {
     if (!confirm('Go back to settings? Your conversation will be cleared.')) return;
+    saveCurrentSession();
     conversationHistory = [];
     document.getElementById('messages').innerHTML = '';
     document.getElementById('chat-screen').style.display = 'none';

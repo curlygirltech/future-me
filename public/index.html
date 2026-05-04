@@ -8,36 +8,36 @@
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
 
     :root {
-      --bg: #0e0e14;
-      --surface: #16161f;
-      --surface2: #1e1e2a;
-      --border: #2a2a3a;
-      --accent: #a78bfa;
-      --accent2: #f0abfc;
-      --text: #e8e8f0;
-      --text-muted: #8888aa;
-      --user-bubble: #312060;
-      --user-bubble-border: #4a2090;
-      --user-bubble-text: #e0d8ff;
-      --ai-bubble: #1a1a28;
-      --success: #6ee7b7;
+      --bg: #1e0816;
+      --surface: #2d0f22;
+      --surface2: #3d1530;
+      --border: #5e2040;
+      --accent: #E36497;
+      --accent2: #F29CA3;
+      --text: #fceef3;
+      --text-muted: #c0809a;
+      --user-bubble: #4a1030;
+      --user-bubble-border: #7a1f50;
+      --user-bubble-text: #F7CACD;
+      --ai-bubble: #250c1c;
+      --success: #84E6F8;
       --error-bg: rgba(239,68,68,0.15);
       --error-border: rgba(239,68,68,0.4);
       --error-text: #fca5a5;
     }
 
     [data-theme="light"] {
-      --bg: #f4f4f9;
+      --bg: #fef5f7;
       --surface: #ffffff;
-      --surface2: #ececf4;
-      --border: #d8d8e8;
-      --text: #1a1a2e;
-      --text-muted: #60608a;
-      --user-bubble: #ebe5ff;
-      --user-bubble-border: #c4b0ff;
-      --user-bubble-text: #2d1b69;
-      --ai-bubble: #f8f8ff;
-      --success: #059669;
+      --surface2: #fdeaee;
+      --border: #F7CACD;
+      --text: #2d0a1e;
+      --text-muted: #8a3f60;
+      --user-bubble: #fde8ee;
+      --user-bubble-border: #F29CA3;
+      --user-bubble-text: #3d0a28;
+      --ai-bubble: #fff8fa;
+      --success: #0099cc;
       --error-bg: rgba(239,68,68,0.08);
       --error-border: rgba(239,68,68,0.3);
       --error-text: #dc2626;
@@ -103,7 +103,7 @@
       font-family: 'DM Serif Display', serif;
       font-size: 30px;
       margin-bottom: 10px;
-      background: linear-gradient(135deg, #e8e8f0 0%, var(--accent2) 100%);
+      background: linear-gradient(135deg, #F7CACD 0%, #E36497 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -142,7 +142,7 @@
       width: 100%;
       padding: 14px;
       border-radius: 12px;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      background: linear-gradient(135deg, #64113F, #E36497);
       color: white;
       font-family: 'DM Sans', sans-serif;
       font-size: 14px;
@@ -177,7 +177,7 @@
       font-family: 'DM Serif Display', serif;
       font-size: 38px;
       line-height: 1.15;
-      background: linear-gradient(135deg, #e8e8f0 0%, var(--accent2) 100%);
+      background: linear-gradient(135deg, #F7CACD 0%, #E36497 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -290,17 +290,17 @@
     }
     .btn-ghost:hover { background: var(--border); color: var(--text); }
 
-    .btn-primary { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; }
+    .btn-primary { background: linear-gradient(135deg, #64113F, #E36497); color: white; }
     .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
     .btn-launch {
-      background: linear-gradient(135deg, #7c3aed, #c026d3);
+      background: linear-gradient(135deg, #64113F, #E36497);
       color: white;
       font-size: 16px;
       padding: 16px;
     }
-    .btn-launch:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,58,237,0.4); }
+    .btn-launch:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(227,100,151,0.4); }
 
     /* ── CHAT SCREEN ──────────────────────────────────────── */
     #chat-screen {
@@ -325,7 +325,7 @@
     .avatar {
       width: 42px; height: 42px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed, #c026d3);
+      background: linear-gradient(135deg, #64113F, #E36497);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -392,7 +392,7 @@
       font-size: 14px;
     }
 
-    .message.ai .message-avatar { background: linear-gradient(135deg, #7c3aed, #c026d3); }
+    .message.ai .message-avatar { background: linear-gradient(135deg, #64113F, #E36497); }
     .message.user .message-avatar {
       background: var(--user-bubble);
       font-size: 12px;
@@ -493,7 +493,7 @@
     #send-btn {
       width: 42px; height: 42px;
       border-radius: 12px;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      background: linear-gradient(135deg, #64113F, #E36497);
       border: none;
       color: white;
       cursor: pointer;

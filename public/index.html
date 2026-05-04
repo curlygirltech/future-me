@@ -517,6 +517,127 @@
       margin: 0 20px 12px;
     }
 
+    /* ── ATTACHMENTS ───────────────────────────────────────── */
+    .attach-wrap { position: relative; flex-shrink: 0; }
+
+    .attach-btn {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.2s;
+    }
+    .attach-btn:hover, .attach-btn.active { background: var(--border); color: var(--accent); border-color: var(--accent); }
+
+    .attach-menu {
+      display: none;
+      position: absolute;
+      bottom: 52px;
+      left: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      min-width: 170px;
+      z-index: 10;
+    }
+    .attach-menu.open { display: block; }
+
+    .attach-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+      background: none;
+      border: none;
+      width: 100%;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .attach-option:hover { background: var(--surface2); color: var(--accent); }
+
+    #attachment-preview {
+      display: none;
+      padding: 8px 20px 0;
+      flex-shrink: 0;
+    }
+
+    .attachment-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 13px;
+      color: var(--text);
+      max-width: 260px;
+    }
+
+    .attachment-chip img {
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .attachment-chip-label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .attachment-chip-remove {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      flex-shrink: 0;
+    }
+    .attachment-chip-remove:hover { color: var(--error-text); }
+
+    .bubble-image {
+      max-width: 260px;
+      border-radius: 10px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .bubble-file-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .bubble-link {
+      color: var(--accent);
+      text-decoration: underline;
+      word-break: break-all;
+    }
+
     /* ── HISTORY PANEL ─────────────────────────────────────── */
     #history-panel {
       display: none;
@@ -833,7 +954,19 @@
     <button class="quick-btn" onclick="quickSend('I\'m feeling stuck. What\'s one thing I can do in the next 30 minutes?')">⏱ I'm feeling stuck</button>
   </div>
 
+  <div id="attachment-preview"></div>
+
   <div class="input-area">
+    <div class="attach-wrap">
+      <button class="attach-btn" id="attach-btn" onclick="toggleAttachMenu(event)" title="Attach file or link">📎</button>
+      <div class="attach-menu" id="attach-menu">
+        <button class="attach-option" onclick="triggerFileInput('image')">🖼️ &nbsp;Image</button>
+        <button class="attach-option" onclick="triggerFileInput('pdf')">📄 &nbsp;Document (PDF)</button>
+        <button class="attach-option" onclick="handleLinkAttach()">🔗 &nbsp;Link</button>
+      </div>
+    </div>
+    <input type="file" id="file-input-image" accept="image/*" style="display:none" onchange="handleFileSelected(event,'image')" />
+    <input type="file" id="file-input-pdf" accept=".pdf,application/pdf" style="display:none" onchange="handleFileSelected(event,'pdf')" />
     <textarea id="chat-input" rows="1" placeholder="Talk to your future self…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button id="send-btn" onclick="sendMessage()">↑</button>
   </div>
@@ -871,6 +1004,7 @@
   let isTyping = false;
   let accessPassword = localStorage.getItem('futureMePassword') || '';
   let currentSessionId = null;
+  let pendingAttachment = null; // { type: 'image'|'pdf'|'link', data, mediaType, name, preview }
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
@@ -1000,9 +1134,9 @@
       const sessions = JSON.parse(localStorage.getItem('futureMeSessions') || '[]');
       sessions.push({
         date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-        messages: conversationHistory.slice(0, 20).map(m => ({
+        messages: stripBinaryContent(conversationHistory).slice(0, 20).map(m => ({
           role: m.role,
-          content: m.content.slice(0, 400)
+          content: typeof m.content === 'string' ? m.content.slice(0, 400) : m.content
         }))
       });
       if (sessions.length > 5) sessions.shift();
@@ -1034,7 +1168,7 @@
     try {
       localStorage.setItem('futureMeActiveChat', JSON.stringify({
         sessionId: currentSessionId,
-        conversationHistory,
+        conversationHistory: stripBinaryContent(conversationHistory),
         userName,
         coachName,
         systemPrompt
@@ -1097,7 +1231,7 @@
         dateStr: new Date(currentSessionId).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         title: getSessionTitle(),
         messageCount: Math.floor(conversationHistory.length / 2),
-        messages: [...conversationHistory]
+        messages: stripBinaryContent(conversationHistory)
       };
       if (idx >= 0) {
         history[idx] = session;
@@ -1318,7 +1452,121 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   }
 
   async function sendOpeningMessage() {
-    await sendToAPI("Hello! Introduce yourself and ask me what I need today.", true);
+    await sendToAPI("Hello! Introduce yourself and ask me what I need today.", true, null);
+  }
+
+  // ── ATTACHMENTS ─────────────────────────────────────────────
+
+  function toggleAttachMenu(e) {
+    e.stopPropagation();
+    const menu = document.getElementById('attach-menu');
+    const btn = document.getElementById('attach-btn');
+    const isOpen = menu.classList.contains('open');
+    menu.classList.toggle('open', !isOpen);
+    btn.classList.toggle('active', !isOpen);
+    if (!isOpen) {
+      const close = () => { menu.classList.remove('open'); btn.classList.remove('active'); document.removeEventListener('click', close); };
+      setTimeout(() => document.addEventListener('click', close), 0);
+    }
+  }
+
+  function triggerFileInput(type) {
+    document.getElementById('attach-menu').classList.remove('open');
+    document.getElementById('attach-btn').classList.remove('active');
+    document.getElementById(`file-input-${type}`).click();
+  }
+
+  function handleFileSelected(event, type) {
+    const file = event.target.files[0];
+    if (!file) return;
+    event.target.value = '';
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File must be under 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const base64 = e.target.result.split(',')[1];
+      setPendingAttachment({
+        type,
+        data: base64,
+        mediaType: file.type,
+        name: file.name,
+        preview: type === 'image' ? e.target.result : null
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleLinkAttach() {
+    document.getElementById('attach-menu').classList.remove('open');
+    document.getElementById('attach-btn').classList.remove('active');
+    const url = prompt('Paste a link:');
+    if (!url || !url.trim()) return;
+    setPendingAttachment({ type: 'link', data: url.trim(), name: url.trim() });
+  }
+
+  function setPendingAttachment(att) {
+    pendingAttachment = att;
+    const area = document.getElementById('attachment-preview');
+    area.style.display = 'block';
+
+    let inner = '';
+    if (att.type === 'image') {
+      inner = `<img src="${att.preview}" alt="preview" style="width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0">`;
+    } else if (att.type === 'pdf') {
+      inner = `<span style="font-size:20px">📄</span>`;
+    } else {
+      inner = `<span style="font-size:20px">🔗</span>`;
+    }
+
+    area.innerHTML = `
+      <div class="attachment-chip">
+        ${inner}
+        <span class="attachment-chip-label">${escapeHtml(att.name)}</span>
+        <button class="attachment-chip-remove" onclick="clearPendingAttachment()" title="Remove">×</button>
+      </div>`;
+  }
+
+  function clearPendingAttachment() {
+    pendingAttachment = null;
+    const area = document.getElementById('attachment-preview');
+    area.style.display = 'none';
+    area.innerHTML = '';
+  }
+
+  function buildMessageContent(text) {
+    if (!pendingAttachment) return text;
+    const att = pendingAttachment;
+    const blocks = [];
+
+    if (att.type === 'image') {
+      blocks.push({ type: 'image', source: { type: 'base64', media_type: att.mediaType, data: att.data } });
+    } else if (att.type === 'pdf') {
+      blocks.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: att.data } });
+    } else if (att.type === 'link') {
+      text = `[Link: ${att.data}]\n${text}`;
+    }
+
+    if (text) blocks.push({ type: 'text', text });
+    return blocks.length === 1 && blocks[0].type === 'text' ? blocks[0].text : blocks;
+  }
+
+  function stripBinaryContent(history) {
+    return history.map(m => {
+      if (typeof m.content === 'string') return m;
+      return {
+        ...m,
+        content: m.content.map(b => {
+          if ((b.type === 'image' || b.type === 'document') && b.source?.type === 'base64') {
+            return { type: 'text', text: b.type === 'image' ? '[Image attached]' : '[Document attached]' };
+          }
+          return b;
+        })
+      };
+    });
   }
 
   function quickSend(text) {
@@ -1338,10 +1586,14 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   async function sendMessage() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
-    if (!text || isTyping) return;
+    if (!text && !pendingAttachment) return;
+    if (isTyping) return;
     input.value = '';
     input.style.height = 'auto';
-    await sendToAPI(text, false);
+    const content = buildMessageContent(text);
+    const att = pendingAttachment;
+    clearPendingAttachment();
+    await sendToAPI(content, false, att);
   }
 
   function sanitize(str) {
@@ -1361,14 +1613,14 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     return result;
   }
 
-  async function sendToAPI(userText, isHidden) {
+  async function sendToAPI(userContent, isHidden, att) {
     if (isTyping) return;
     isTyping = true;
     document.getElementById('send-btn').disabled = true;
     clearError();
 
-    if (!isHidden) appendMessage('user', userText);
-    conversationHistory.push({ role: 'user', content: userText });
+    if (!isHidden) appendMessage('user', userContent, att);
+    conversationHistory.push({ role: 'user', content: userContent });
 
     const typingEl = appendTyping();
 
@@ -1379,7 +1631,12 @@ Always open your first message by greeting ${userName} warmly, introducing yours
         body: JSON.stringify({
           accessPassword,
           system: sanitize(systemPrompt),
-          messages: conversationHistory.map(m => ({ ...m, content: sanitize(m.content) }))
+          messages: conversationHistory.map(m => ({
+            ...m,
+            content: typeof m.content === 'string'
+              ? sanitize(m.content)
+              : m.content.map(b => b.type === 'text' ? { ...b, text: sanitize(b.text) } : b)
+          }))
         })
       });
 
@@ -1416,7 +1673,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     document.getElementById('chat-input').focus();
   }
 
-  function appendMessage(role, text) {
+  function appendMessage(role, content, att) {
     const area = document.getElementById('messages');
     const el = document.createElement('div');
     el.className = `message ${role}`;
@@ -1427,8 +1684,30 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
     const bubble = document.createElement('div');
     bubble.className = 'bubble';
-    bubble.innerHTML = formatText(text);
 
+    let html = '';
+
+    // Render attachment visuals
+    if (att) {
+      if (att.type === 'image' && att.preview) {
+        html += `<img src="${att.preview}" class="bubble-image" alt="attached image">`;
+      } else if (att.type === 'pdf') {
+        html += `<div class="bubble-file-chip">📄 ${escapeHtml(att.name)}</div>`;
+      }
+    }
+
+    // Render text
+    const text = typeof content === 'string'
+      ? content
+      : content.find?.(b => b.type === 'text')?.text || '';
+
+    if (text) {
+      // Linkify URLs
+      const linked = text.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener" class="bubble-link">$1</a>');
+      html += formatText(linked);
+    }
+
+    bubble.innerHTML = html;
     el.appendChild(avatarEl);
     el.appendChild(bubble);
     area.appendChild(el);

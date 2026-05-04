@@ -817,7 +817,7 @@
     <div class="header-actions">
       <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
       <button class="icon-btn theme-toggle" onclick="toggleTheme()" id="chat-theme-btn" title="Toggle theme">🌙</button>
-      <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑</button>
+      <button class="icon-btn" onclick="newChat()" title="New chat" style="font-size:14px;font-weight:700;">＋</button>
       <button class="icon-btn" onclick="resetToSetup()" title="Edit settings">⚙️</button>
     </div>
   </div>
@@ -923,6 +923,7 @@
       if (el) el.addEventListener('input', saveSetup);
       if (el) el.addEventListener('change', saveSetup);
     });
+    if (restoreActiveConversation()) return;
     try {
       const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
       if (saved['name'] && saved['goal']) launch();
@@ -1024,6 +1025,53 @@
       memory += `\nDraw on this naturally — reference past wins, struggles, or themes when relevant. Don't announce that you're reading notes; just be present and continuous.`;
       return memory;
     } catch(e) { return ''; }
+  }
+
+  // ── ACTIVE CONVERSATION PERSISTENCE ────────────────────────
+
+  function saveActiveConversation() {
+    if (!currentSessionId || conversationHistory.length === 0) return;
+    try {
+      localStorage.setItem('futureMeActiveChat', JSON.stringify({
+        sessionId: currentSessionId,
+        conversationHistory,
+        userName,
+        coachName,
+        systemPrompt
+      }));
+    } catch(e) {}
+  }
+
+  function restoreActiveConversation() {
+    try {
+      const saved = localStorage.getItem('futureMeActiveChat');
+      if (!saved) return false;
+      const data = JSON.parse(saved);
+      if (!data.conversationHistory || data.conversationHistory.length < 2) return false;
+
+      currentSessionId = data.sessionId;
+      conversationHistory = data.conversationHistory;
+      userName = data.userName;
+      coachName = data.coachName;
+      systemPrompt = data.systemPrompt;
+
+      document.getElementById('chat-name').textContent = coachName;
+      document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('chat-screen').style.display = 'flex';
+
+      const area = document.getElementById('messages');
+      area.innerHTML = '';
+      conversationHistory
+        .filter(m => !m.content.startsWith('Hello! Introduce yourself'))
+        .forEach(m => appendMessage(m.role === 'user' ? 'user' : 'ai', m.content));
+
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function clearActiveConversation() {
+    localStorage.removeItem('futureMeActiveChat');
   }
 
   // ── HISTORY (full chat log) ──────────────────────────────────
@@ -1259,6 +1307,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     coachName = document.getElementById('coach-name').value.trim() || `Future ${document.getElementById('name').value.trim()}`;
     userName = document.getElementById('name').value.trim();
     currentSessionId = Date.now();
+    clearActiveConversation();
 
     document.getElementById('chat-name').textContent = coachName;
     document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
@@ -1355,6 +1404,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       const reply = data.content?.[0]?.text || '(No response)';
       conversationHistory.push({ role: 'assistant', content: reply });
       appendMessage('ai', reply);
+      saveActiveConversation();
 
     } catch (err) {
       typingEl.remove();
@@ -1423,10 +1473,11 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       </div>`;
   }
 
-  function clearChat() {
-    if (!confirm('Clear this conversation and start fresh?')) return;
+  function newChat() {
+    if (!confirm('Start a new chat? Your current conversation will be saved to history.')) return;
     saveCurrentSession();
     saveToHistory();
+    clearActiveConversation();
     conversationHistory = [];
     currentSessionId = Date.now();
     document.getElementById('messages').innerHTML = '';
@@ -1437,6 +1488,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     if (!confirm('Go back to settings? Your conversation will be cleared.')) return;
     saveCurrentSession();
     saveToHistory();
+    clearActiveConversation();
     conversationHistory = [];
     currentSessionId = null;
     document.getElementById('messages').innerHTML = '';

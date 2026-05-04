@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -17,8 +17,30 @@
       --text: #e8e8f0;
       --text-muted: #8888aa;
       --user-bubble: #312060;
+      --user-bubble-border: #4a2090;
+      --user-bubble-text: #e0d8ff;
       --ai-bubble: #1a1a28;
       --success: #6ee7b7;
+      --error-bg: rgba(239,68,68,0.15);
+      --error-border: rgba(239,68,68,0.4);
+      --error-text: #fca5a5;
+    }
+
+    [data-theme="light"] {
+      --bg: #f4f4f9;
+      --surface: #ffffff;
+      --surface2: #ececf4;
+      --border: #d8d8e8;
+      --text: #1a1a2e;
+      --text-muted: #60608a;
+      --user-bubble: #ebe5ff;
+      --user-bubble-border: #c4b0ff;
+      --user-bubble-text: #2d1b69;
+      --ai-bubble: #f8f8ff;
+      --success: #059669;
+      --error-bg: rgba(239,68,68,0.08);
+      --error-border: rgba(239,68,68,0.3);
+      --error-text: #dc2626;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -31,6 +53,30 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── THEME TOGGLE ──────────────────────────────────────── */
+    .theme-toggle {
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .theme-toggle:hover { background: var(--border); color: var(--text); }
+
+    .setup-theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
     }
 
     /* ── PASSWORD GATE ─────────────────────────────────────── */
@@ -86,7 +132,7 @@
     #gate-password:focus { border-color: var(--accent); }
 
     #gate-error {
-      color: #fca5a5;
+      color: var(--error-text);
       font-size: 13px;
       margin-bottom: 10px;
       display: none;
@@ -194,17 +240,13 @@
       font-size: 14px;
       color: var(--text);
       outline: none;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
       resize: vertical;
     }
 
-    input:focus, textarea:focus, select:focus {
-      border-color: var(--accent);
-    }
-
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
     input::placeholder, textarea::placeholder { color: var(--text-muted); }
-
-    select option { background: var(--surface2); }
+    select option { background: var(--surface2); color: var(--text); }
 
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
@@ -223,24 +265,11 @@
       border-radius: 10px;
       padding: 12px;
     }
-    .milestone-card label {
-      font-size: 11px;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-    .milestone-card input {
-      border: none;
-      background: transparent;
-      padding: 4px 0;
-      font-size: 13px;
-    }
+    .milestone-card label { font-size: 11px; color: var(--accent); margin-bottom: 6px; }
+    .milestone-card input { border: none; background: transparent; padding: 4px 0; font-size: 13px; }
     .milestone-card input:focus { border: none; }
 
-    .nav-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 32px;
-    }
+    .nav-buttons { display: flex; gap: 12px; margin-top: 32px; }
 
     .btn {
       flex: 1;
@@ -261,10 +290,7 @@
     }
     .btn-ghost:hover { background: var(--border); color: var(--text); }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      color: white;
-    }
+    .btn-primary { background: linear-gradient(135deg, #7c3aed, #a855f7); color: white; }
     .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
@@ -308,19 +334,10 @@
     }
 
     .chat-header-info { flex: 1; }
-    .chat-header-name {
-      font-weight: 600;
-      font-size: 15px;
-    }
-    .chat-header-sub {
-      font-size: 12px;
-      color: var(--success);
-    }
+    .chat-header-name { font-weight: 600; font-size: 15px; }
+    .chat-header-sub { font-size: 12px; color: var(--success); }
 
-    .header-actions {
-      display: flex;
-      gap: 8px;
-    }
+    .header-actions { display: flex; gap: 8px; }
 
     .icon-btn {
       width: 34px; height: 34px;
@@ -363,10 +380,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    .message.user {
-      align-self: flex-end;
-      flex-direction: row-reverse;
-    }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
 
     .message-avatar {
       width: 32px; height: 32px;
@@ -378,10 +392,7 @@
       font-size: 14px;
     }
 
-    .message.ai .message-avatar {
-      background: linear-gradient(135deg, #7c3aed, #c026d3);
-    }
-
+    .message.ai .message-avatar { background: linear-gradient(135deg, #7c3aed, #c026d3); }
     .message.user .message-avatar {
       background: var(--user-bubble);
       font-size: 12px;
@@ -404,9 +415,9 @@
 
     .message.user .bubble {
       background: var(--user-bubble);
-      border: 1px solid #4a2090;
+      border: 1px solid var(--user-bubble-border);
       border-top-right-radius: 4px;
-      color: #e0d8ff;
+      color: var(--user-bubble-text);
     }
 
     .bubble p { margin-bottom: 10px; }
@@ -415,12 +426,7 @@
     .bubble ul, .bubble ol { padding-left: 18px; margin: 8px 0; }
     .bubble li { margin-bottom: 4px; }
 
-    .typing-indicator {
-      display: flex;
-      gap: 5px;
-      align-items: center;
-      padding: 14px 16px;
-    }
+    .typing-indicator { display: flex; gap: 5px; align-items: center; padding: 14px 16px; }
     .typing-dot {
       width: 7px; height: 7px;
       border-radius: 50%;
@@ -454,11 +460,7 @@
       transition: all 0.2s;
       white-space: nowrap;
     }
-    .quick-btn:hover {
-      background: var(--border);
-      color: var(--text);
-      border-color: var(--accent);
-    }
+    .quick-btn:hover { background: var(--border); color: var(--text); border-color: var(--accent); }
 
     .input-area {
       padding: 14px 20px 20px;
@@ -506,13 +508,162 @@
     #send-btn:disabled { opacity: 0.4; transform: none; cursor: not-allowed; }
 
     .error-banner {
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.4);
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
       border-radius: 10px;
       padding: 12px 16px;
       font-size: 13px;
-      color: #fca5a5;
+      color: var(--error-text);
       margin: 0 20px 12px;
+    }
+
+    /* ── HISTORY PANEL ─────────────────────────────────────── */
+    #history-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 100;
+      flex-direction: column;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .history-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .history-back-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 0;
+      transition: opacity 0.2s;
+    }
+    .history-back-btn:hover { opacity: 0.7; }
+
+    .history-title {
+      flex: 1;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .history-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .history-body::-webkit-scrollbar { width: 4px; }
+    .history-body::-webkit-scrollbar-track { background: transparent; }
+    .history-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .history-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .history-empty .empty-icon { font-size: 40px; margin-bottom: 16px; }
+    .history-empty p { font-size: 14px; line-height: 1.6; }
+
+    .history-group { margin-bottom: 28px; }
+
+    .history-group-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .history-item {
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .history-item:hover { border-color: var(--accent); background: var(--surface2); }
+
+    .history-item-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ── SESSION DETAIL VIEW ──────────────────────────────── */
+    #session-view {
+      display: none;
+      flex-direction: column;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 101;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .session-view-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .session-view-info { flex: 1; }
+    .session-view-title { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .session-view-date { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .session-messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .session-messages-area::-webkit-scrollbar { width: 4px; }
+    .session-messages-area::-webkit-scrollbar-track { background: transparent; }
+    .session-messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .readonly-badge {
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -532,6 +683,8 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ SETUP SCREEN -->
+<button class="theme-toggle setup-theme-toggle" onclick="toggleTheme()" id="setup-theme-btn" title="Toggle theme">🌙</button>
+
 <div id="setup-screen">
   <div class="setup-header">
     <div class="eyebrow">✦ Your AI Life Coach</div>
@@ -662,13 +815,14 @@
       <div class="chat-header-sub">● Ready to coach you</div>
     </div>
     <div class="header-actions">
+      <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
+      <button class="icon-btn theme-toggle" onclick="toggleTheme()" id="chat-theme-btn" title="Toggle theme">🌙</button>
       <button class="icon-btn" onclick="clearChat()" title="Clear chat">🗑</button>
       <button class="icon-btn" onclick="resetToSetup()" title="Edit settings">⚙️</button>
     </div>
   </div>
 
   <div class="messages-area" id="messages"></div>
-
   <div id="error-area"></div>
 
   <div class="quick-actions" id="quick-actions">
@@ -685,6 +839,29 @@
   </div>
 </div>
 
+<!-- ═══════════════════════════════════════════════ HISTORY PANEL -->
+<div id="history-panel">
+  <div class="history-header">
+    <button class="history-back-btn" onclick="closeHistory()">← Back to Chat</button>
+    <div class="history-title">Chat History</div>
+    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+  <div class="history-body" id="history-body"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ SESSION DETAIL -->
+<div id="session-view">
+  <div class="session-view-header">
+    <button class="history-back-btn" onclick="closeSessionView()">← History</button>
+    <div class="session-view-info">
+      <div class="session-view-title" id="session-view-title"></div>
+      <div class="session-view-date" id="session-view-date"></div>
+    </div>
+  </div>
+  <div class="session-messages-area" id="session-messages"></div>
+  <div class="readonly-badge">Read-only · Past session</div>
+</div>
+
 <script>
   let currentStep = 0;
   let systemPrompt = '';
@@ -693,10 +870,31 @@
   let coachName = '';
   let isTyping = false;
   let accessPassword = localStorage.getItem('futureMePassword') || '';
+  let currentSessionId = null;
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
                   'non-negotiables','tone','extra','q1','q2','q3','q4'];
+
+  // ── THEME ───────────────────────────────────────────────────
+
+  function initTheme() {
+    const saved = localStorage.getItem('futureMeTheme') || 'dark';
+    setTheme(saved);
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  }
+
+  function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('futureMeTheme', theme);
+    const icon = theme === 'dark' ? '🌙' : '☀️';
+    document.querySelectorAll('.theme-toggle, #setup-theme-btn, #chat-theme-btn')
+      .forEach(btn => btn.textContent = icon);
+  }
 
   // ── PASSWORD GATE ───────────────────────────────────────────
 
@@ -725,16 +923,14 @@
       if (el) el.addEventListener('input', saveSetup);
       if (el) el.addEventListener('change', saveSetup);
     });
-    // Auto-resume if setup is already saved
     try {
       const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
-      if (saved['name'] && saved['goal']) {
-        launch();
-      }
+      if (saved['name'] && saved['goal']) launch();
     } catch(e) {}
   }
 
   window.addEventListener('load', () => {
+    initTheme();
     if (!accessPassword) {
       showPasswordGate(false);
     } else {
@@ -744,6 +940,7 @@
 
   window.addEventListener('beforeunload', () => {
     saveCurrentSession();
+    saveToHistory();
   });
 
   // ── SETUP ───────────────────────────────────────────────────
@@ -794,7 +991,7 @@
     currentStep = n;
   }
 
-  // ── SESSION MEMORY ──────────────────────────────────────────
+  // ── SESSION MEMORY (for AI context) ─────────────────────────
 
   function saveCurrentSession() {
     if (conversationHistory.length === 0) return;
@@ -829,6 +1026,150 @@
     } catch(e) { return ''; }
   }
 
+  // ── HISTORY (full chat log) ──────────────────────────────────
+
+  function getSessionTitle() {
+    const firstReal = conversationHistory.find(m =>
+      m.role === 'user' && !m.content.startsWith('Hello! Introduce yourself')
+    );
+    if (!firstReal) return 'Chat session';
+    return firstReal.content.length > 65
+      ? firstReal.content.slice(0, 65) + '…'
+      : firstReal.content;
+  }
+
+  function saveToHistory() {
+    if (!currentSessionId || conversationHistory.length < 3) return;
+    try {
+      const history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]');
+      const idx = history.findIndex(s => s.id === currentSessionId);
+      const session = {
+        id: currentSessionId,
+        timestamp: currentSessionId,
+        dateStr: new Date(currentSessionId).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        title: getSessionTitle(),
+        messageCount: Math.floor(conversationHistory.length / 2),
+        messages: [...conversationHistory]
+      };
+      if (idx >= 0) {
+        history[idx] = session;
+      } else {
+        history.unshift(session);
+      }
+      if (history.length > 50) history.splice(50);
+      localStorage.setItem('futureMeHistory', JSON.stringify(history));
+    } catch(e) {}
+  }
+
+  function getDateCategory(timestamp) {
+    const now = new Date();
+    const date = new Date(timestamp);
+    const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+    const sameDay = now.toDateString() === date.toDateString();
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = yesterday.toDateString() === date.toDateString();
+
+    if (sameDay) return 'Today';
+    if (isYesterday) return 'Yesterday';
+    if (diffDays <= 7) return 'This Week';
+    if (diffDays <= 30) return 'This Month';
+    return 'Older';
+  }
+
+  function openHistory() {
+    saveToHistory();
+    renderHistory();
+    document.getElementById('history-panel').style.display = 'flex';
+  }
+
+  function closeHistory() {
+    document.getElementById('history-panel').style.display = 'none';
+  }
+
+  function renderHistory() {
+    const body = document.getElementById('history-body');
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch(e) {}
+
+    if (history.length === 0) {
+      body.innerHTML = `
+        <div class="history-empty">
+          <div class="empty-icon">💬</div>
+          <p>No saved chats yet.<br/>Your conversations will appear here after you finish a session.</p>
+        </div>`;
+      return;
+    }
+
+    const groups = {};
+    const order = ['Today', 'Yesterday', 'This Week', 'This Month', 'Older'];
+    history.forEach(session => {
+      const cat = getDateCategory(session.timestamp);
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(session);
+    });
+
+    body.innerHTML = order
+      .filter(cat => groups[cat])
+      .map(cat => `
+        <div class="history-group">
+          <div class="history-group-label">${cat}</div>
+          ${groups[cat].map(s => `
+            <div class="history-item" onclick="viewSession(${s.id})">
+              <div class="history-item-title">${escapeHtml(s.title)}</div>
+              <div class="history-item-meta">
+                <span>${s.dateStr}</span>
+                <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `).join('');
+  }
+
+  function viewSession(id) {
+    let history = [];
+    try { history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch(e) {}
+    const session = history.find(s => s.id === id);
+    if (!session) return;
+
+    document.getElementById('session-view-title').textContent = session.title;
+    document.getElementById('session-view-date').textContent = session.dateStr;
+
+    const area = document.getElementById('session-messages');
+    const savedUserName = JSON.parse(localStorage.getItem('futureMeSetup') || '{}')['name'] || 'You';
+    area.innerHTML = '';
+
+    session.messages
+      .filter(m => !m.content.startsWith('Hello! Introduce yourself'))
+      .forEach(m => {
+        const el = document.createElement('div');
+        el.className = `message ${m.role === 'user' ? 'user' : 'ai'}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'message-avatar';
+        avatar.textContent = m.role === 'user' ? savedUserName.charAt(0).toUpperCase() : '✦';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble';
+        bubble.innerHTML = formatText(m.content);
+
+        el.appendChild(avatar);
+        el.appendChild(bubble);
+        area.appendChild(el);
+      });
+
+    document.getElementById('session-view').style.display = 'flex';
+  }
+
+  function closeSessionView() {
+    document.getElementById('session-view').style.display = 'none';
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
   // ── SYSTEM PROMPT ───────────────────────────────────────────
 
   function buildSystemPrompt() {
@@ -851,7 +1192,7 @@
 
     let milestones = '';
     if (q1 || q2 || q3 || q4) {
-      milestones = `\nMY QUARTERLY MILESTONES:\n${q1 ? `- Q1: ${q1}\n` : ''}${q2 ? `- Q2: ${q2}\n` : ''}${q3 ? `- Q3: ${q3}\n` : ''}${q4 ? `- Q4: ${q4}\n` : ''}`;
+      milestones = `\nMY QUARTERLY MILESTONES:\n${q1?`- Q1: ${q1}\n`:''}${q2?`- Q2: ${q2}\n`:''}${q3?`- Q3: ${q3}\n`:''}${q4?`- Q4: ${q4}\n`:''}`;
       milestones += `\nWhen ${userName} asks "am I on track?" or "what phase am I in?", figure out today's approximate quarter and compare their progress to these milestones.`;
     }
 
@@ -917,10 +1258,10 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     systemPrompt = buildSystemPrompt();
     coachName = document.getElementById('coach-name').value.trim() || `Future ${document.getElementById('name').value.trim()}`;
     userName = document.getElementById('name').value.trim();
+    currentSessionId = Date.now();
 
     document.getElementById('chat-name').textContent = coachName;
     document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
-
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('chat-screen').style.display = 'flex';
 
@@ -937,10 +1278,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   }
 
   function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
 
   function autoResize(el) {
@@ -965,9 +1303,8 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       if (code >= 0xD800 && code <= 0xDBFF) {
         const next = str.charCodeAt(i + 1);
         if (next >= 0xDC00 && next <= 0xDFFF) { result += str[i] + str[i + 1]; i++; }
-        // lone high surrogate — drop it
       } else if (code >= 0xDC00 && code <= 0xDFFF) {
-        // lone low surrogate — drop it
+        // lone low surrogate — drop
       } else {
         result += str[i];
       }
@@ -981,10 +1318,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     document.getElementById('send-btn').disabled = true;
     clearError();
 
-    if (!isHidden) {
-      appendMessage('user', userText);
-    }
-
+    if (!isHidden) appendMessage('user', userText);
     conversationHistory.push({ role: 'user', content: userText });
 
     const typingEl = appendTyping();
@@ -1003,7 +1337,6 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       typingEl.remove();
 
       if (response.status === 401) {
-        // Wrong or expired password — re-prompt
         localStorage.removeItem('futureMePassword');
         accessPassword = '';
         conversationHistory.pop();
@@ -1020,7 +1353,6 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
       const data = await response.json();
       const reply = data.content?.[0]?.text || '(No response)';
-
       conversationHistory.push({ role: 'assistant', content: reply });
       appendMessage('ai', reply);
 
@@ -1058,15 +1390,12 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     const area = document.getElementById('messages');
     const el = document.createElement('div');
     el.className = 'message ai';
-
     const avatarEl = document.createElement('div');
     avatarEl.className = 'message-avatar';
     avatarEl.textContent = '✦';
-
     const bubble = document.createElement('div');
     bubble.className = 'bubble typing-indicator';
     bubble.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-
     el.appendChild(avatarEl);
     el.appendChild(bubble);
     area.appendChild(el);
@@ -1084,9 +1413,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       .replace(/$/, '</p>');
   }
 
-  function clearError() {
-    document.getElementById('error-area').innerHTML = '';
-  }
+  function clearError() { document.getElementById('error-area').innerHTML = ''; }
 
   function showError(msg) {
     document.getElementById('error-area').innerHTML = `
@@ -1099,7 +1426,9 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   function clearChat() {
     if (!confirm('Clear this conversation and start fresh?')) return;
     saveCurrentSession();
+    saveToHistory();
     conversationHistory = [];
+    currentSessionId = Date.now();
     document.getElementById('messages').innerHTML = '';
     sendOpeningMessage();
   }
@@ -1107,7 +1436,9 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   function resetToSetup() {
     if (!confirm('Go back to settings? Your conversation will be cleared.')) return;
     saveCurrentSession();
+    saveToHistory();
     conversationHistory = [];
+    currentSessionId = null;
     document.getElementById('messages').innerHTML = '';
     document.getElementById('chat-screen').style.display = 'none';
     document.getElementById('setup-screen').style.display = 'block';

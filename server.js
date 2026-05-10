@@ -1,40 +1,54 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import handler from './api/chat.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
 
 const server = http.createServer(async (req, res) => {
-  // Serve the API route
   if (req.method === 'POST' && req.url === '/api/chat') {
-    let body = '';
-    req.on('data', chunk => body += chunk);
+    let raw = '';
+    req.on('data', chunk => raw += chunk);
     req.on('end', async () => {
+      let body;
       try {
-        const { apiKey, system, messages } = JSON.parse(body);
-
-        if (!apiKey) {
-          res.writeHead(400, { 'Content-Type': 'application/json' });
-          return res.end(JSON.stringify({ error: 'API key required' }));
-        }
-
-        const apiRes = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1024, system, messages }),
-        });
-
-        const data = await apiRes.json();
-        res.writeHead(apiRes.status, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(data));
-      } catch (err) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
+        body = JSON.parse(raw);
+      } catch {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'Invalid JSON' }));
       }
+
+      // Adapt Node's raw req/res to the shape the handler expects
+      const mockReq = { method: req.method, body };
+
+      const pendingHeaders = {};
+      let statusCode = 200;
+      let sent = false;
+
+      const mockRes = {
+        setHeader: (k, v) => { pendingHeaders[k] = v; },
+        status: (code) => { statusCode = code; return mockRes; },
+        json: (data) => {
+          if (!sent) {
+            sent = true;
+            res.writeHead(statusCode, { 'Content-Type': 'application/json', ...pendingHeaders });
+            res.end(JSON.stringify(data));
+          }
+          return mockRes;
+        },
+        end: () => {
+          if (!sent) {
+            sent = true;
+            res.writeHead(statusCode, pendingHeaders);
+            res.end();
+          }
+          return mockRes;
+        },
+      };
+
+      await handler(mockReq, mockRes);
     });
     return;
   }

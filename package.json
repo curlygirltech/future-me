@@ -1,0 +1,9 @@
+{
+  "name": "future-me",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/chat.test.mjs",
+    "start": "node server.js"
+  }
+}

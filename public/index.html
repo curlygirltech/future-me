@@ -933,6 +933,284 @@
       min-height: 18px;
       transition: color 0.3s;
     }
+
+    /* ── RESOURCES PANEL ──────────────────────────────── */
+    #resources-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 102;
+      flex-direction: column;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .resources-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .resources-title { flex: 1; font-weight: 600; font-size: 15px; }
+
+    .resources-toolbar {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .resources-tag-bar {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .resources-tag-bar::-webkit-scrollbar { display: none; }
+
+    .tag-chip {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .tag-chip:hover { border-color: var(--accent); color: var(--text); }
+    .tag-chip.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+    .add-resource-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #64113F, #E36497);
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: filter 0.2s;
+      flex-shrink: 0;
+    }
+    .add-resource-btn:hover { filter: brightness(1.1); }
+
+    .resources-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .resources-body::-webkit-scrollbar { width: 4px; }
+    .resources-body::-webkit-scrollbar-track { background: transparent; }
+    .resources-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .resources-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .resources-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 0 0 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .resources-section-label + .resources-section-label { margin-top: 20px; }
+
+    .resource-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 12px 11px;
+      margin-bottom: 8px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+    .resource-card:hover { border-color: var(--accent2); }
+    .resource-card.pinned { border-color: var(--accent); background: var(--surface2); }
+
+    .resource-type-icon { font-size: 17px; margin-top: 1px; flex-shrink: 0; }
+
+    .resource-main { flex: 1; min-width: 0; }
+
+    .resource-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .resource-preview {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 7px;
+    }
+
+    .resource-tags { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .resource-tag {
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .resource-actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .resource-pin-btn {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .resource-pin-btn:hover { background: var(--surface2); color: var(--accent); }
+    .resource-pin-btn.pinned { color: var(--accent); }
+
+    .resource-menu-btn {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+    .resource-menu-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .resource-dropdown {
+      display: none;
+      position: absolute;
+      top: 40px;
+      right: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      min-width: 130px;
+      z-index: 200;
+    }
+    .resource-dropdown.open { display: block; }
+
+    /* ── RESOURCE FORM (bottom sheet) ─────────────────── */
+    #resource-form {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 720px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-radius: 20px 20px 0 0;
+      padding: 20px 20px 32px;
+      z-index: 300;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.3);
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .rf-form-header { display: flex; align-items: center; margin-bottom: 4px; }
+    .rf-form-title { flex: 1; font-weight: 600; font-size: 15px; }
+    .rf-close-btn {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      border: none;
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .rf-type-row { display: flex; gap: 8px; }
+    .rf-type-btn {
+      flex: 1;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.15s;
+      text-align: center;
+    }
+    .rf-type-btn:hover { border-color: var(--accent2); color: var(--text); }
+    .rf-type-btn.active { border-color: var(--accent); color: var(--text); }
+
+    .rf-pin-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .rf-pin-label input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .rf-actions { display: flex; gap: 10px; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -1240,6 +1518,45 @@
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════ RESOURCES PANEL -->
+<div id="resources-panel">
+  <div class="resources-header">
+    <button class="history-back-btn" onclick="closeResourcesPanel()">← Back to Chat</button>
+    <div class="resources-title">Resource Library</div>
+    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+  <div class="resources-toolbar">
+    <div class="resources-tag-bar" id="resources-tag-bar"></div>
+    <button class="add-resource-btn" onclick="openAddResourceForm()">+ Add</button>
+  </div>
+  <div class="resources-body" id="resources-body">
+    <div class="resources-empty">No resources yet.<br/>Add links, notes, or anything worth keeping.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ RESOURCE FORM -->
+<div id="resource-form" style="display:none">
+  <div class="rf-form-header">
+    <div class="rf-form-title" id="rf-form-title">Add Resource</div>
+    <button class="rf-close-btn" onclick="closeResourceForm()">✕</button>
+  </div>
+  <div class="rf-type-row">
+    <button class="rf-type-btn active" id="rf-type-link" onclick="setResourceType('link')">🔗 Link</button>
+    <button class="rf-type-btn" id="rf-type-note" onclick="setResourceType('note')">📝 Note</button>
+  </div>
+  <input type="text" id="rf-title" placeholder="Title" />
+  <textarea id="rf-content" rows="3" placeholder="Paste URL here…"></textarea>
+  <input type="text" id="rf-tags" placeholder="Tags — comma-separated, e.g. mindset, pricing" />
+  <label class="rf-pin-label">
+    <input type="checkbox" id="rf-pinned" />
+    Pin to coach (always available in your conversations)
+  </label>
+  <div class="rf-actions">
+    <button class="btn btn-ghost" style="padding:10px 0" onclick="closeResourceForm()">Cancel</button>
+    <button class="btn btn-primary" style="padding:10px 0" onclick="saveResource()">Save</button>
+  </div>
+</div>
+
 <script>
   let currentStep = 0;
   let systemPrompt = '';
@@ -1253,7 +1570,13 @@
   let deviceId = null;
   let historyCache = [];
   let pendingAttachment = null; // { type: 'image'|'pdf'|'link', data, mediaType, name, preview }
-  let recentSummaries = []; // populated before each new session launch
+  let recentSummaries = [];
+  let currentPatterns = null;
+  let pinnedResources = [];
+  let allResources = [];
+  let resourcesTagFilter = null;
+  let editingResourceId = null;
+  let selectedResourceType = 'link';
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
@@ -1425,6 +1748,30 @@
       memory += `\nDraw on this naturally — reference past wins, struggles, or themes when relevant. Don't announce that you're reading notes; just be present and continuous.`;
       return memory;
     } catch(e) { return ''; }
+  }
+
+  function buildPatternsContext() {
+    if (!currentPatterns) return '';
+    const { themes, struggles, wins, current_focus } = currentPatterns;
+    let block = `\n\nDETECTED PATTERNS — synthesized from all of ${userName}'s past sessions:`;
+    if (themes?.length) block += `\n- Recurring themes: ${themes.join(', ')}`;
+    if (struggles?.length) block += `\n- What ${userName} tends to struggle with: ${struggles.join(', ')}`;
+    if (wins?.length) block += `\n- Wins across sessions: ${wins.join(', ')}`;
+    if (current_focus) block += `\n- Current focus area: ${current_focus}`;
+    block += `\n\nUse these patterns naturally — reference them when they're relevant to the conversation. Don't recite them as a list.`;
+    return block;
+  }
+
+  function buildPinnedResourcesContext() {
+    if (!pinnedResources.length) return '';
+    let block = `\n\nPINNED RESOURCES — ${userName} has flagged these as important:`;
+    pinnedResources.forEach(r => {
+      block += `\n- [${r.type === 'link' ? 'Link' : 'Note'}] ${r.title}`;
+      if (r.content) block += `: ${r.content.slice(0, 120)}`;
+      if (r.tags?.length) block += ` (tags: ${r.tags.join(', ')})`;
+    });
+    block += `\n\nReference these when they're relevant to what ${userName} is working on.`;
+    return block;
   }
 
   async function fetchRecentSummaries() {
@@ -1860,10 +2207,240 @@
     'g-q1': 'q1', 'g-q2': 'q2', 'g-q3': 'q3', 'g-q4': 'q4',
   };
 
+  // ── PATTERNS ────────────────────────────────────────────────
+
+  async function fetchCurrentPatterns() {
+    if (!deviceId) return;
+    try {
+      const res = await fetch(`/api/patterns?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (!res.ok) return;
+      currentPatterns = await res.json();
+    } catch {}
+  }
+
+  function analyzePatterns() {
+    if (!deviceId) return;
+    fetch('/api/patterns', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessPassword, deviceId }),
+    }).then(async r => {
+      if (r.ok) {
+        const data = await r.json();
+        if (!data.skipped) currentPatterns = data;
+      }
+    }).catch(() => {});
+  }
+
+  // ── PINNED RESOURCES ─────────────────────────────────────────
+
+  async function fetchPinnedResources() {
+    if (!deviceId) return;
+    try {
+      const res = await fetch(`/api/resources?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (!res.ok) return;
+      const all = await res.json();
+      pinnedResources = all.filter(r => r.is_pinned);
+    } catch {}
+  }
+
   // ── RESOURCES PANEL ─────────────────────────────────────────
-  // Full implementation coming in Phase 3. Stub keeps the button functional.
-  function openResourcesPanel() {
-    // Phase 3 — will open the full resource library panel
+
+  async function openResourcesPanel() {
+    document.getElementById('resources-panel').style.display = 'flex';
+    await loadResources();
+  }
+
+  function closeResourcesPanel() {
+    closeResourceForm();
+    document.getElementById('resources-panel').style.display = 'none';
+  }
+
+  async function loadResources() {
+    try {
+      const res = await fetch(`/api/resources?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (!res.ok) return;
+      allResources = await res.json();
+      renderResources();
+    } catch {}
+  }
+
+  function renderResources() {
+    const body = document.getElementById('resources-body');
+    const tagBar = document.getElementById('resources-tag-bar');
+
+    const tagSet = new Set();
+    allResources.forEach(r => (r.tags || []).forEach(t => tagSet.add(t)));
+    tagBar.innerHTML = Array.from(tagSet).sort().map(t =>
+      `<button class="tag-chip${t === resourcesTagFilter ? ' active' : ''}" onclick="setTagFilter('${escapeHtml(t)}')">${escapeHtml(t)}</button>`
+    ).join('');
+
+    const filtered = resourcesTagFilter
+      ? allResources.filter(r => (r.tags || []).includes(resourcesTagFilter))
+      : allResources;
+
+    if (filtered.length === 0) {
+      body.innerHTML = `<div class="resources-empty">${resourcesTagFilter ? `No resources tagged "${escapeHtml(resourcesTagFilter)}".` : 'No resources yet.<br/>Add links, notes, or anything worth keeping.'}</div>`;
+      return;
+    }
+
+    const pinned = filtered.filter(r => r.is_pinned);
+    const unpinned = filtered.filter(r => !r.is_pinned);
+    let html = '';
+    if (pinned.length > 0) {
+      html += `<div class="resources-section-label">📌 Pinned to Coach</div>`;
+      pinned.forEach(r => { html += buildResourceCard(r); });
+    }
+    if (unpinned.length > 0) {
+      html += `<div class="resources-section-label"${pinned.length ? ' style="margin-top:20px"' : ''}>All Resources</div>`;
+      unpinned.forEach(r => { html += buildResourceCard(r); });
+    }
+    body.innerHTML = html;
+  }
+
+  function buildResourceCard(r) {
+    const icon = r.type === 'link' ? '🔗' : '📝';
+    const preview = r.content
+      ? (r.type === 'link' ? r.content : r.content.slice(0, 90) + (r.content.length > 90 ? '…' : ''))
+      : '';
+    const tags = (r.tags || []).map(t => `<span class="resource-tag">${escapeHtml(t)}</span>`).join('');
+    return `
+      <div class="resource-card${r.is_pinned ? ' pinned' : ''}" id="rc-${r.id}">
+        <div class="resource-type-icon">${icon}</div>
+        <div class="resource-main">
+          <div class="resource-title">${escapeHtml(r.title)}</div>
+          ${preview ? `<div class="resource-preview">${escapeHtml(preview)}</div>` : ''}
+          ${tags ? `<div class="resource-tags">${tags}</div>` : ''}
+        </div>
+        <div class="resource-actions">
+          <button class="resource-pin-btn${r.is_pinned ? ' pinned' : ''}"
+            onclick="toggleResourcePin('${r.id}',${r.is_pinned})"
+            title="${r.is_pinned ? 'Unpin' : 'Pin to coach'}">${r.is_pinned ? '📌' : '📍'}</button>
+          <button class="resource-menu-btn" onclick="toggleResourceMenu(event,'${r.id}')">···</button>
+          <div class="resource-dropdown" id="rdrop-${r.id}">
+            <button class="history-action" onclick="openEditResourceForm('${r.id}')">✏️ &nbsp;Edit</button>
+            <button class="history-action danger" onclick="deleteResource('${r.id}')">🗑️ &nbsp;Delete</button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function toggleResourceMenu(e, id) {
+    e.stopPropagation();
+    const drop = document.getElementById(`rdrop-${id}`);
+    const isOpen = drop.classList.contains('open');
+    document.querySelectorAll('.resource-dropdown').forEach(d => d.classList.remove('open'));
+    if (!isOpen) {
+      drop.classList.add('open');
+      const close = () => { drop.classList.remove('open'); document.removeEventListener('click', close); };
+      setTimeout(() => document.addEventListener('click', close), 0);
+    }
+  }
+
+  function setTagFilter(tag) {
+    resourcesTagFilter = resourcesTagFilter === tag ? null : tag;
+    renderResources();
+  }
+
+  function openAddResourceForm() {
+    editingResourceId = null;
+    document.getElementById('rf-form-title').textContent = 'Add Resource';
+    document.getElementById('rf-title').value = '';
+    document.getElementById('rf-content').value = '';
+    document.getElementById('rf-tags').value = '';
+    document.getElementById('rf-pinned').checked = false;
+    setResourceType('link');
+    document.getElementById('resource-form').style.display = 'flex';
+    setTimeout(() => document.getElementById('rf-title').focus(), 50);
+  }
+
+  function openEditResourceForm(id) {
+    const r = allResources.find(x => x.id === id);
+    if (!r) return;
+    editingResourceId = id;
+    document.getElementById('rf-form-title').textContent = 'Edit Resource';
+    document.getElementById('rf-title').value = r.title;
+    document.getElementById('rf-content').value = r.content || '';
+    document.getElementById('rf-tags').value = (r.tags || []).join(', ');
+    document.getElementById('rf-pinned').checked = r.is_pinned;
+    setResourceType(r.type);
+    document.getElementById('resource-form').style.display = 'flex';
+    setTimeout(() => document.getElementById('rf-title').focus(), 50);
+  }
+
+  function closeResourceForm() {
+    document.getElementById('resource-form').style.display = 'none';
+    editingResourceId = null;
+  }
+
+  function setResourceType(type) {
+    selectedResourceType = type;
+    document.getElementById('rf-type-link').classList.toggle('active', type === 'link');
+    document.getElementById('rf-type-note').classList.toggle('active', type === 'note');
+    document.getElementById('rf-content').placeholder = type === 'link' ? 'Paste URL here…' : 'Write your note…';
+  }
+
+  async function saveResource() {
+    const title = document.getElementById('rf-title').value.trim();
+    if (!title) { document.getElementById('rf-title').focus(); return; }
+    const content = document.getElementById('rf-content').value.trim();
+    const tagsRaw = document.getElementById('rf-tags').value.trim();
+    const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+    const is_pinned = document.getElementById('rf-pinned').checked;
+
+    try {
+      if (editingResourceId) {
+        await fetch(`/api/resources/${editingResourceId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessPassword, title, content, tags, is_pinned }),
+        });
+        const idx = allResources.findIndex(r => r.id === editingResourceId);
+        if (idx >= 0) allResources[idx] = { ...allResources[idx], title, content, tags, is_pinned };
+      } else {
+        const res = await fetch('/api/resources', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ accessPassword, deviceId, type: selectedResourceType, title, content, tags, is_pinned }),
+        });
+        if (res.ok) {
+          const created = await res.json();
+          allResources.unshift(created);
+        }
+      }
+      closeResourceForm();
+      renderResources();
+      pinnedResources = allResources.filter(r => r.is_pinned);
+    } catch {}
+  }
+
+  async function toggleResourcePin(id, currentlyPinned) {
+    const is_pinned = !currentlyPinned;
+    try {
+      await fetch(`/api/resources/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessPassword, is_pinned }),
+      });
+      const idx = allResources.findIndex(r => r.id === id);
+      if (idx >= 0) allResources[idx] = { ...allResources[idx], is_pinned };
+      pinnedResources = allResources.filter(r => r.is_pinned);
+      renderResources();
+    } catch {}
+  }
+
+  async function deleteResource(id) {
+    if (!confirm('Delete this resource?')) return;
+    try {
+      await fetch(`/api/resources/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessPassword }),
+      });
+      allResources = allResources.filter(r => r.id !== id);
+      pinnedResources = allResources.filter(r => r.is_pinned);
+      renderResources();
+    } catch {}
   }
 
   function openGoalsPanel() {
@@ -2013,7 +2590,7 @@ FORMATTING RULES:
 - Keep responses focused — don't overwhelm with walls of text
 - Use a conversational, flowing tone — not bullet points unless listing tasks
 
-Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.${buildMemoryContext()}`;
+Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.${buildMemoryContext()}${buildPatternsContext()}${buildPinnedResourcesContext()}`;
   }
 
   // ── CHAT ────────────────────────────────────────────────────
@@ -2024,9 +2601,12 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     currentSessionId = Date.now();
     clearActiveConversation();
 
-    // Fetch recent session summaries before building the system prompt
-    // so the coach has context from past conversations.
-    recentSummaries = await fetchRecentSummaries();
+    // Fetch all context in parallel before building the system prompt.
+    [recentSummaries] = await Promise.all([
+      fetchRecentSummaries(),
+      fetchCurrentPatterns(),
+      fetchPinnedResources(),
+    ]);
     systemPrompt = buildSystemPrompt();
 
     document.getElementById('chat-name').textContent = coachName;
@@ -2258,6 +2838,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       syncMessagesToSupabase(supabaseSessionId, messagesToSync, exchangeCount);
       if (!isHidden && exchangeCount === 1) updateSupabaseSessionTitle(supabaseSessionId, getSessionTitle());
       if (!isHidden) summarizeSession(supabaseSessionId, conversationHistory, userName);
+      if (!isHidden) analyzePatterns();
 
     } catch (err) {
       typingEl.remove();
@@ -2356,6 +2937,12 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     conversationHistory = [];
     currentSessionId = Date.now();
     document.getElementById('messages').innerHTML = '';
+    [recentSummaries] = await Promise.all([
+      fetchRecentSummaries(),
+      fetchCurrentPatterns(),
+      fetchPinnedResources(),
+    ]);
+    systemPrompt = buildSystemPrompt();
     supabaseSessionId = await createSupabaseSession();
     sendOpeningMessage();
   }

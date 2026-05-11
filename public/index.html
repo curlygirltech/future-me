@@ -1084,7 +1084,7 @@
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
-      <button class="icon-btn theme-toggle" onclick="toggleTheme()" id="chat-theme-btn" title="Toggle theme">🌙</button>
+      <button class="icon-btn" onclick="openResourcesPanel()" title="Resources">📚</button>
       <button class="icon-btn" onclick="newChat()" title="New chat" style="font-size:14px;font-weight:700;">＋</button>
       <button class="icon-btn" onclick="openGoalsPanel()" title="Edit goals">⚙️</button>
     </div>
@@ -1275,7 +1275,7 @@
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('futureMeTheme', theme);
     const icon = theme === 'dark' ? '🌙' : '☀️';
-    document.querySelectorAll('.theme-toggle, #setup-theme-btn, #chat-theme-btn')
+    document.querySelectorAll('.theme-toggle')
       .forEach(btn => btn.textContent = icon);
   }
 
@@ -1859,6 +1859,12 @@
     'g-nonneg': 'non-negotiables', 'g-tone': 'tone', 'g-extra': 'extra',
     'g-q1': 'q1', 'g-q2': 'q2', 'g-q3': 'q3', 'g-q4': 'q4',
   };
+
+  // ── RESOURCES PANEL ─────────────────────────────────────────
+  // Full implementation coming in Phase 3. Stub keeps the button functional.
+  function openResourcesPanel() {
+    // Phase 3 — will open the full resource library panel
+  }
 
   function openGoalsPanel() {
     // Populate goals panel fields from current setup values

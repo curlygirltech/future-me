@@ -6,6 +6,8 @@ import chatHandler from './api/chat.js';
 import sessionsHandler from './api/sessions.js';
 import summarizeHandler from './api/summarize.js';
 import goalsHandler from './api/goals.js';
+import patternsHandler from './api/patterns.js';
+import resourcesHandler from './api/resources.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
@@ -54,25 +56,28 @@ function parseBody(req) {
 }
 
 const server = http.createServer(async (req, res) => {
-  // API routes with a body
-  if (['POST', 'PATCH'].includes(req.method) && req.url.startsWith('/api/')) {
+  if (['POST', 'PATCH', 'DELETE'].includes(req.method) && req.url.startsWith('/api/')) {
     let body;
     try { body = await parseBody(req); }
     catch {
       res.writeHead(400, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ error: 'Invalid JSON' }));
     }
-    if (req.url === '/api/chat') return dispatch(chatHandler, req, res, body);
+    if (req.url === '/api/chat')      return dispatch(chatHandler,      req, res, body);
     if (req.url === '/api/summarize') return dispatch(summarizeHandler, req, res, body);
-    if (req.url === '/api/goals') return dispatch(goalsHandler, req, res, body);
-    if (req.url.startsWith('/api/sessions')) return dispatch(sessionsHandler, req, res, body);
+    if (req.url === '/api/goals')     return dispatch(goalsHandler,     req, res, body);
+    if (req.url === '/api/patterns')  return dispatch(patternsHandler,  req, res, body);
+    if (req.url.startsWith('/api/resources')) return dispatch(resourcesHandler, req, res, body);
+    if (req.url.startsWith('/api/sessions'))  return dispatch(sessionsHandler,  req, res, body);
   }
 
-  // API routes without a body (GET, OPTIONS)
-  if (req.url.startsWith('/api/sessions')) return dispatch(sessionsHandler, req, res, {});
-  if (req.url.startsWith('/api/goals')) return dispatch(goalsHandler, req, res, {});
+  // GET + OPTIONS
+  if (req.url.startsWith('/api/sessions'))  return dispatch(sessionsHandler,  req, res, {});
+  if (req.url.startsWith('/api/resources')) return dispatch(resourcesHandler, req, res, {});
+  if (req.url.startsWith('/api/goals'))     return dispatch(goalsHandler,     req, res, {});
+  if (req.url.startsWith('/api/patterns'))  return dispatch(patternsHandler,  req, res, {});
 
-  // Static files from public/
+  // Static files
   const filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
   fs.readFile(filePath, (err, data) => {
     if (err) { res.writeHead(404); return res.end('Not found'); }

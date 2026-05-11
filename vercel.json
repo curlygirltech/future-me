@@ -1,9 +1,12 @@
 {
   "rewrites": [
-    { "source": "/api/chat", "destination": "/api/chat" },
-    { "source": "/api/summarize", "destination": "/api/summarize" },
-    { "source": "/api/goals", "destination": "/api/goals" },
-    { "source": "/api/sessions", "destination": "/api/sessions" },
-    { "source": "/api/sessions/:path*", "destination": "/api/sessions" }
+    { "source": "/api/chat",              "destination": "/api/chat" },
+    { "source": "/api/summarize",         "destination": "/api/summarize" },
+    { "source": "/api/goals",             "destination": "/api/goals" },
+    { "source": "/api/patterns",          "destination": "/api/patterns" },
+    { "source": "/api/resources",         "destination": "/api/resources" },
+    { "source": "/api/resources/:path*",  "destination": "/api/resources" },
+    { "source": "/api/sessions",          "destination": "/api/sessions" },
+    { "source": "/api/sessions/:path*",   "destination": "/api/sessions" }
   ]
 }

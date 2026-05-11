@@ -23,13 +23,21 @@ export default async function handler(req, res) {
         .select('data, updated_at')
         .eq('device_id', deviceId)
         .single();
-      // PGRST116 = no rows found — not an error, just no saved goals yet
       if (error && error.code !== 'PGRST116') return res.status(500).json({ error: error.message });
       return res.status(200).json(data || null);
     }
 
     if (req.method === 'POST') {
       const { data: goals } = req.body;
+
+      // Snapshot the current goals before overwriting (goal evolution tracking).
+      // Fire-and-forget — don't block the save if this fails.
+      supabase
+        .from('goal_snapshots')
+        .insert({ device_id: deviceId, data: goals })
+        .then(() => {})
+        .catch(() => {});
+
       const { error } = await supabase
         .from('goals')
         .upsert(

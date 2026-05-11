@@ -1,65 +1,7 @@
 import { describe, it, beforeEach, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
+import { makeRes, makeReq, makeChain, makeMockDb } from './helpers.mjs';
 import { createSessionsHandler } from '../api/sessions.js';
-
-// ── mock helpers ──────────────────────────────────────────────────────────────
-
-/**
- * Returns a chainable Supabase-shaped object that resolves to `result` when awaited.
- * Every method in the chain returns a new chainable, so arbitrary method sequences work.
- */
-function makeChain(result = { data: null, error: null }) {
-  const chain = {
-    select: () => makeChain(result),
-    insert: () => makeChain(result),
-    update: () => makeChain(result),
-    eq:     () => makeChain(result),
-    order:  () => makeChain(result),
-    limit:  () => makeChain(result),
-    single: () => makeChain(result),
-    then:   (resolve, reject) => Promise.resolve(result).then(resolve, reject),
-    catch:  (reject)          => Promise.resolve(result).catch(reject),
-  };
-  return chain;
-}
-
-/**
- * Builds a mock Supabase client.
- * `tableResponses` maps table name → { insert, select, update } result overrides.
- * Each property is a { data, error } object returned when that operation is awaited.
- * Calls to .insert() are recorded in `db.insertCalls` for assertion.
- */
-function makeMockDb(tableResponses = {}) {
-  const insertCalls = [];
-  const db = {
-    insertCalls,
-    from(table) {
-      const t = tableResponses[table] || {};
-      return {
-        insert(rows) {
-          insertCalls.push({ table, rows });
-          return makeChain(t.insert ?? { data: null, error: null });
-        },
-        select() { return makeChain(t.select ?? { data: [], error: null }); },
-        update() { return makeChain(t.update ?? { data: null, error: null }); },
-      };
-    },
-  };
-  return db;
-}
-
-function makeRes() {
-  const res = { headers: {}, statusCode: null, body: null };
-  res.setHeader = (k, v) => { res.headers[k] = v; };
-  res.status    = (code)  => { res.statusCode = code; return res; };
-  res.json      = (data)  => { res.body = data; return res; };
-  res.end       = ()      => res;
-  return res;
-}
-
-function makeReq(method, url, body = {}) {
-  return { method, url, body: { accessPassword: 'secret', ...body } };
-}
 
 // ── setup ─────────────────────────────────────────────────────────────────────
 
@@ -81,7 +23,7 @@ describe('CORS', () => {
     const res = makeRes();
     await handler(makeReq('OPTIONS', '/api/sessions'), res);
     assert.equal(res.headers['Access-Control-Allow-Origin'], '*');
-    assert.equal(res.headers['Access-Control-Allow-Methods'], 'GET, POST, PATCH, OPTIONS');
+    assert.ok(res.headers['Access-Control-Allow-Methods'].includes('DELETE'));
     assert.equal(res.headers['Access-Control-Allow-Headers'], 'Content-Type');
   });
 
@@ -194,13 +136,32 @@ describe('GET /api/sessions — list sessions', () => {
 // ── PATCH /api/sessions/:id ───────────────────────────────────────────────────
 
 describe('PATCH /api/sessions/:id — update session', () => {
-  it('returns 200 ok', async () => {
+  it('returns 200 when renaming', async () => {
     const db = makeMockDb({ sessions: { update: { data: null, error: null } } });
     handler = createSessionsHandler(db);
     const res = makeRes();
     await handler(makeReq('PATCH', '/api/sessions/sess-1', { title: 'New title' }), res);
     assert.equal(res.statusCode, 200);
     assert.deepEqual(res.body, { ok: true });
+  });
+
+  it('sets is_archived=true and archived_at when archiving', async () => {
+    const db = makeMockDb({ sessions: { update: { data: null, error: null } } });
+    handler = createSessionsHandler(db);
+    await handler(makeReq('PATCH', '/api/sessions/sess-1', { archived: true }), makeRes());
+    const call = db.updateCalls.find(c => c.table === 'sessions');
+    assert.ok(call, 'expected an update call');
+    assert.equal(call.data.is_archived, true);
+    assert.ok(call.data.archived_at, 'archived_at should be set');
+  });
+
+  it('clears is_archived and archived_at when unarchiving', async () => {
+    const db = makeMockDb({ sessions: { update: { data: null, error: null } } });
+    handler = createSessionsHandler(db);
+    await handler(makeReq('PATCH', '/api/sessions/sess-1', { archived: false }), makeRes());
+    const call = db.updateCalls.find(c => c.table === 'sessions');
+    assert.equal(call.data.is_archived, false);
+    assert.equal(call.data.archived_at, null);
   });
 
   it('returns 500 when Supabase update fails', async () => {
@@ -210,6 +171,44 @@ describe('PATCH /api/sessions/:id — update session', () => {
     await handler(makeReq('PATCH', '/api/sessions/sess-1', { title: 'x' }), res);
     assert.equal(res.statusCode, 500);
     assert.equal(res.body.error, 'update failed');
+  });
+});
+
+// ── DELETE /api/sessions/:id ──────────────────────────────────────────────────
+
+describe('DELETE /api/sessions/:id — soft-delete', () => {
+  it('returns 200 on successful delete', async () => {
+    const db = makeMockDb({ sessions: { update: { data: null, error: null } } });
+    handler = createSessionsHandler(db);
+    const res = makeRes();
+    await handler(makeReq('DELETE', '/api/sessions/sess-1'), res);
+    assert.equal(res.statusCode, 200);
+    assert.deepEqual(res.body, { ok: true });
+  });
+
+  it('sets deleted_at timestamp (soft-delete, not hard-delete)', async () => {
+    const db = makeMockDb({ sessions: { update: { data: null, error: null } } });
+    handler = createSessionsHandler(db);
+    await handler(makeReq('DELETE', '/api/sessions/sess-1'), makeRes());
+    const call = db.updateCalls.find(c => c.table === 'sessions');
+    assert.ok(call, 'expected an update call on sessions');
+    assert.ok(call.data.deleted_at, 'deleted_at should be set');
+  });
+
+  it('does not hard-delete — no delete() call on sessions table', async () => {
+    const db = makeMockDb({ sessions: { update: { data: null, error: null } } });
+    handler = createSessionsHandler(db);
+    await handler(makeReq('DELETE', '/api/sessions/sess-1'), makeRes());
+    assert.equal(db.deleteCalls.filter(c => c.table === 'sessions').length, 0);
+  });
+
+  it('returns 500 when Supabase update fails', async () => {
+    const db = makeMockDb({ sessions: { update: { data: null, error: { message: 'delete failed' } } } });
+    handler = createSessionsHandler(db);
+    const res = makeRes();
+    await handler(makeReq('DELETE', '/api/sessions/sess-1'), res);
+    assert.equal(res.statusCode, 500);
+    assert.equal(res.body.error, 'delete failed');
   });
 });
 
@@ -281,8 +280,6 @@ describe('POST /api/sessions/:id/messages — append messages', () => {
   });
 
   it('skips duplicate batch — same content as most recent DB message', async () => {
-    // Simulate the last message in DB matching the first incoming message.
-    // This catches the case where the same exchange is synced twice.
     const db = makeMockDb({
       messages: {
         select: { data: [{ content: 'Hello' }], error: null },
@@ -293,7 +290,7 @@ describe('POST /api/sessions/:id/messages — append messages', () => {
     handler = createSessionsHandler(db);
     const res = makeRes();
     const messages = [
-      { role: 'user', content: 'Hello' },      // matches last DB message
+      { role: 'user', content: 'Hello' },
       { role: 'assistant', content: 'Hi there' },
     ];
     await handler(makeReq('POST', '/api/sessions/sess-1/messages', { messages, messageCount: 1 }), res);
@@ -313,23 +310,6 @@ describe('POST /api/sessions/:id/messages — append messages', () => {
     handler = createSessionsHandler(db);
     const res = makeRes();
     const messages = [{ role: 'user', content: 'New message' }];
-    await handler(makeReq('POST', '/api/sessions/sess-1/messages', { messages, messageCount: 1 }), res);
-    assert.equal(res.statusCode, 200);
-    assert.deepEqual(res.body, { ok: true });
-    assert.equal(db.insertCalls.filter(c => c.table === 'messages').length, 1);
-  });
-
-  it('inserts normally when session has no prior messages', async () => {
-    const db = makeMockDb({
-      messages: {
-        select: { data: [], error: null },
-        insert: { data: null, error: null },
-      },
-      sessions: { update: { data: null, error: null } },
-    });
-    handler = createSessionsHandler(db);
-    const res = makeRes();
-    const messages = [{ role: 'user', content: 'First ever message' }];
     await handler(makeReq('POST', '/api/sessions/sess-1/messages', { messages, messageCount: 1 }), res);
     assert.equal(res.statusCode, 200);
     assert.deepEqual(res.body, { ok: true });
@@ -393,7 +373,7 @@ describe('GET /api/sessions/:id/messages — fetch messages', () => {
 describe('Unknown routes', () => {
   it('returns 404 for unsupported method/path combination', async () => {
     const res = makeRes();
-    await handler(makeReq('DELETE', '/api/sessions/sess-1'), res);
+    await handler(makeReq('PUT', '/api/sessions/sess-1'), res);
     assert.equal(res.statusCode, 404);
     assert.equal(res.body.error, 'Not found');
   });

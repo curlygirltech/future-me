@@ -718,6 +718,7 @@
       margin-bottom: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      position: relative;
     }
     .history-item:hover { border-color: var(--accent); background: var(--surface2); }
 
@@ -729,6 +730,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      padding-right: 28px;
     }
 
     .history-item-meta {
@@ -737,6 +739,76 @@
       display: flex;
       gap: 10px;
     }
+
+    /* ── HISTORY ITEM ACTION MENU ─────────────────────────── */
+    .history-item-menu-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.15s, background 0.15s;
+      line-height: 1;
+    }
+    .history-item:hover .history-item-menu-btn { opacity: 1; }
+    .history-item-menu-btn:hover { background: var(--border); color: var(--text); }
+    .history-item-menu-btn.open { opacity: 1; }
+
+    .history-item-dropdown {
+      display: none;
+      position: absolute;
+      top: 36px;
+      right: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      min-width: 150px;
+      z-index: 200;
+    }
+    .history-item-dropdown.open { display: block; }
+
+    .history-action {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 10px 14px;
+      background: none;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+    .history-action:hover { background: var(--surface2); }
+    .history-action.danger { color: var(--error-text); }
+    .history-action.danger:hover { background: var(--error-bg); }
+
+    .archived-toggle {
+      text-align: center;
+      padding: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+      transition: color 0.2s;
+    }
+    .archived-toggle:hover { color: var(--accent); }
 
     /* ── SESSION DETAIL VIEW ──────────────────────────────── */
     #session-view {
@@ -1252,6 +1324,13 @@
     }
   });
 
+  // Close history item menus when clicking anywhere outside them
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.history-item-menu-btn') && !e.target.closest('.history-item-dropdown')) {
+      closeAllHistoryMenus();
+    }
+  });
+
   window.addEventListener('beforeunload', () => {
     saveCurrentSession();
     saveToHistory();
@@ -1483,6 +1562,8 @@
   }
 
   function closeHistory() {
+    showingArchived = false;
+    closeAllHistoryMenus();
     document.getElementById('history-panel').style.display = 'none';
   }
 
@@ -1490,16 +1571,19 @@
     const body = document.getElementById('history-body');
     body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px">Loading…</div>';
 
-    // Fetch from Supabase
+    // Fetch from Supabase (active or archived based on showingArchived toggle)
     let supabaseSessions = [];
     try {
-      const res = await fetch(`/api/sessions?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const params = `accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}${showingArchived ? '&archived=true' : ''}`;
+      const res = await fetch(`/api/sessions?${params}`);
       if (res.ok) supabaseSessions = await res.json();
     } catch {}
 
-    // Fall back to localStorage for any sessions not yet in Supabase
+    // Fall back to localStorage for sessions not yet in Supabase (active view only)
     let localHistory = [];
-    try { localHistory = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch {}
+    if (!showingArchived) {
+      try { localHistory = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch {}
+    }
 
     const supabaseFormatted = supabaseSessions.map(s => ({
       id: s.id,
@@ -1509,12 +1593,13 @@
       title: s.title || 'Chat session',
       messageCount: s.message_count || 0,
       summary: s.summary || '',
+      archived_at: s.archived_at || null,
     }));
 
     const supabaseIds = new Set(supabaseSessions.map(s => s.id));
     const localFormatted = localHistory
       .filter(s => !supabaseIds.has(String(s.id)))
-      .map(s => ({ ...s, source: 'local' }));
+      .map(s => ({ ...s, source: 'local', archived_at: null }));
 
     const combined = [...supabaseFormatted, ...localFormatted]
       .sort((a, b) => b.timestamp - a.timestamp);
@@ -1522,10 +1607,16 @@
     historyCache = combined;
 
     if (combined.length === 0) {
+      const emptyMsg = showingArchived
+        ? '<p>No archived chats.</p>'
+        : '<p>No saved chats yet.<br/>Your conversations will appear here after you finish a session.</p>';
       body.innerHTML = `
         <div class="history-empty">
-          <div class="empty-icon">💬</div>
-          <p>No saved chats yet.<br/>Your conversations will appear here after you finish a session.</p>
+          <div class="empty-icon">${showingArchived ? '📁' : '💬'}</div>
+          ${emptyMsg}
+        </div>
+        <div class="archived-toggle" onclick="toggleArchivedView()">
+          ${showingArchived ? '← Back to active chats' : '📁 View archived chats'}
         </div>`;
       return;
     }
@@ -1538,23 +1629,124 @@
       groups[cat].push(s);
     });
 
+    const renderItem = (s) => `
+      <div class="history-item" id="hist-${s.id}" onclick="handleHistoryItemClick(event,'${s.id}','${s.source}')">
+        <button class="history-item-menu-btn" onclick="toggleHistoryMenu(event,'${s.id}')" title="Options">···</button>
+        <div class="history-item-dropdown" id="menu-${s.id}">
+          <button class="history-action" onclick="renameSession(event,'${s.id}','${s.source}')">✏️ Rename</button>
+          <button class="history-action" onclick="archiveSession(event,'${s.id}','${s.source}',${!!s.archived_at})">${s.archived_at ? '📤 Unarchive' : '📥 Archive'}</button>
+          <button class="history-action danger" onclick="deleteSession(event,'${s.id}','${s.source}')">🗑 Delete</button>
+        </div>
+        <div class="history-item-title">${escapeHtml(s.title)}</div>
+        <div class="history-item-meta">
+          <span>${s.dateStr}</span>
+          <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
+        </div>
+        ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
+      </div>`;
+
     body.innerHTML = order
       .filter(cat => groups[cat])
       .map(cat => `
         <div class="history-group">
           <div class="history-group-label">${cat}</div>
-          ${groups[cat].map(s => `
-            <div class="history-item" onclick="viewSession('${s.id}', '${s.source}')">
-              <div class="history-item-title">${escapeHtml(s.title)}</div>
-              <div class="history-item-meta">
-                <span>${s.dateStr}</span>
-                <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
-              </div>
-              ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
-            </div>
-          `).join('')}
+          ${groups[cat].map(renderItem).join('')}
         </div>
-      `).join('');
+      `).join('') +
+      `<div class="archived-toggle" onclick="toggleArchivedView()">
+        ${showingArchived ? '← Back to active chats' : '📁 View archived chats'}
+      </div>`;
+  }
+
+  let showingArchived = false;
+
+  async function toggleArchivedView() {
+    showingArchived = !showingArchived;
+    await renderHistory();
+  }
+
+  function handleHistoryItemClick(e, id, source) {
+    // Don't open session if clicking the menu button or inside the dropdown
+    if (e.target.closest('.history-item-menu-btn') || e.target.closest('.history-item-dropdown')) return;
+    closeAllHistoryMenus();
+    viewSession(id, source);
+  }
+
+  function toggleHistoryMenu(e, id) {
+    e.stopPropagation();
+    const isOpen = document.getElementById(`menu-${id}`).classList.contains('open');
+    closeAllHistoryMenus();
+    if (!isOpen) {
+      document.getElementById(`menu-${id}`).classList.add('open');
+      document.getElementById(`hist-${id}`).querySelector('.history-item-menu-btn').classList.add('open');
+    }
+  }
+
+  function closeAllHistoryMenus() {
+    document.querySelectorAll('.history-item-dropdown.open').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.history-item-menu-btn.open').forEach(el => el.classList.remove('open'));
+  }
+
+  async function renameSession(e, id, source) {
+    e.stopPropagation();
+    closeAllHistoryMenus();
+    const session = historyCache.find(s => String(s.id) === String(id));
+    const newTitle = prompt('Rename chat:', session?.title || '');
+    if (!newTitle || !newTitle.trim()) return;
+    const title = newTitle.trim();
+    // Update UI immediately
+    const titleEl = document.querySelector(`#hist-${id} .history-item-title`);
+    if (titleEl) titleEl.textContent = title;
+    if (session) session.title = title;
+    // Persist
+    if (source === 'supabase') {
+      fetch(`/api/sessions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessPassword, title }),
+      }).catch(() => {});
+    } else {
+      try {
+        const history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]');
+        const idx = history.findIndex(s => String(s.id) === String(id));
+        if (idx >= 0) { history[idx].title = title; localStorage.setItem('futureMeHistory', JSON.stringify(history)); }
+      } catch {}
+    }
+  }
+
+  async function archiveSession(e, id, source, isCurrentlyArchived) {
+    e.stopPropagation();
+    closeAllHistoryMenus();
+    // Remove from current view (it'll reappear in the other view)
+    document.getElementById(`hist-${id}`)?.remove();
+    historyCache = historyCache.filter(s => String(s.id) !== String(id));
+    if (source === 'supabase') {
+      fetch(`/api/sessions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessPassword, archived: !isCurrentlyArchived }),
+      }).catch(() => {});
+    }
+  }
+
+  async function deleteSession(e, id, source) {
+    e.stopPropagation();
+    closeAllHistoryMenus();
+    if (!confirm('Delete this chat? This cannot be undone.')) return;
+    document.getElementById(`hist-${id}`)?.remove();
+    historyCache = historyCache.filter(s => String(s.id) !== String(id));
+    if (source === 'supabase') {
+      fetch(`/api/sessions/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessPassword }),
+      }).catch(() => {});
+    } else {
+      try {
+        const history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]');
+        localStorage.setItem('futureMeHistory', JSON.stringify(history.filter(s => String(s.id) !== String(id))));
+      } catch {}
+    }
   }
 
   async function viewSession(id, source) {

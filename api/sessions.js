@@ -7,14 +7,14 @@ function authorized(password) {
 export function createSessionsHandler(db) {
   return async function sessionsHandler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const url = new URL(req.url, 'http://localhost');
     const parts = url.pathname.replace(/\/api\/sessions\/?/, '').split('/').filter(Boolean);
-    // parts: []               → /api/sessions
-    // parts: ['id']           → /api/sessions/:id
+    // parts: []                → /api/sessions
+    // parts: ['id']            → /api/sessions/:id
     // parts: ['id','messages'] → /api/sessions/:id/messages
 
     const password = req.body?.accessPassword || url.searchParams.get('accessPassword');
@@ -34,24 +34,45 @@ export function createSessionsHandler(db) {
         return res.status(201).json(data);
       }
 
-      // GET /api/sessions — list sessions for this device
+      // GET /api/sessions — list for this device; archived=true returns archived, else active only
       if (req.method === 'GET' && parts.length === 0) {
+        const showArchived = url.searchParams.get('archived') === 'true';
         const { data, error } = await db
           .from('sessions')
-          .select('id, title, started_at, last_active_at, message_count, summary')
+          .select('id, title, started_at, last_active_at, message_count, summary, archived_at')
           .eq('device_id', deviceId)
+          .is('deleted_at', null)
+          .eq('is_archived', showArchived)
           .order('last_active_at', { ascending: false })
           .limit(50);
         if (error) return res.status(500).json({ error: error.message });
         return res.status(200).json(data);
       }
 
-      // PATCH /api/sessions/:id — update title / last_active_at
+      // PATCH /api/sessions/:id — rename, archive/unarchive, or update metadata
       if (req.method === 'PATCH' && parts.length === 1) {
         const updates = { last_active_at: new Date().toISOString() };
         if (req.body.title !== undefined) updates.title = req.body.title;
         if (req.body.message_count !== undefined) updates.message_count = req.body.message_count;
+        if (req.body.archived === true) {
+          updates.is_archived = true;
+          updates.archived_at = new Date().toISOString();
+        }
+        if (req.body.archived === false) {
+          updates.is_archived = false;
+          updates.archived_at = null;
+        }
         const { error } = await db.from('sessions').update(updates).eq('id', parts[0]);
+        if (error) return res.status(500).json({ error: error.message });
+        return res.status(200).json({ ok: true });
+      }
+
+      // DELETE /api/sessions/:id — soft-delete
+      if (req.method === 'DELETE' && parts.length === 1) {
+        const { error } = await db
+          .from('sessions')
+          .update({ deleted_at: new Date().toISOString() })
+          .eq('id', parts[0]);
         if (error) return res.status(500).json({ error: error.message });
         return res.status(200).json({ ok: true });
       }
@@ -60,14 +81,11 @@ export function createSessionsHandler(db) {
       if (req.method === 'POST' && parts.length === 2 && parts[1] === 'messages') {
         const { messages, messageCount } = req.body;
 
-        // Guard: nothing to insert
         if (!Array.isArray(messages) || messages.length === 0) {
           return res.status(200).json({ ok: true, skipped: true });
         }
 
-        // Duplicate guard: fetch the most recent message for this session and
-        // compare its content to the first message we're about to insert.
-        // If they match, this is a repeated sync of the same batch — skip it.
+        // Duplicate guard: skip if incoming batch matches the most recent saved message
         const { data: recent } = await db
           .from('messages')
           .select('content')

@@ -38,7 +38,7 @@ export function createSessionsHandler(db) {
       if (req.method === 'GET' && parts.length === 0) {
         const { data, error } = await db
           .from('sessions')
-          .select('id, title, started_at, last_active_at, message_count')
+          .select('id, title, started_at, last_active_at, message_count, summary')
           .eq('device_id', deviceId)
           .order('last_active_at', { ascending: false })
           .limit(50);

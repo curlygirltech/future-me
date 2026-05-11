@@ -4,6 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import chatHandler from './api/chat.js';
 import sessionsHandler from './api/sessions.js';
+import summarizeHandler from './api/summarize.js';
+import goalsHandler from './api/goals.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
@@ -61,11 +63,14 @@ const server = http.createServer(async (req, res) => {
       return res.end(JSON.stringify({ error: 'Invalid JSON' }));
     }
     if (req.url === '/api/chat') return dispatch(chatHandler, req, res, body);
+    if (req.url === '/api/summarize') return dispatch(summarizeHandler, req, res, body);
+    if (req.url === '/api/goals') return dispatch(goalsHandler, req, res, body);
     if (req.url.startsWith('/api/sessions')) return dispatch(sessionsHandler, req, res, body);
   }
 
   // API routes without a body (GET, OPTIONS)
   if (req.url.startsWith('/api/sessions')) return dispatch(sessionsHandler, req, res, {});
+  if (req.url.startsWith('/api/goals')) return dispatch(goalsHandler, req, res, {});
 
   // Static files from public/
   const filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);

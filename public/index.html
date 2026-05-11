@@ -786,6 +786,81 @@
       background: var(--surface);
       flex-shrink: 0;
     }
+
+    /* ── HISTORY ITEM SUMMARY ─────────────────────────────── */
+    .history-item-summary {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-style: italic;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ── GOALS PANEL ──────────────────────────────────────── */
+    #goals-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 102;
+      flex-direction: column;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .goals-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .goals-title { flex: 1; font-weight: 600; font-size: 15px; }
+
+    .goals-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .goals-body::-webkit-scrollbar { width: 4px; }
+    .goals-body::-webkit-scrollbar-track { background: transparent; }
+    .goals-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .goals-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 28px 0 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .goals-section-label:first-child { margin-top: 0; }
+
+    .goals-save-bar {
+      padding: 14px 20px 20px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    #goals-save-status {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      min-height: 18px;
+      transition: color 0.3s;
+    }
   </style>
 </head>
 <body>
@@ -939,7 +1014,7 @@
       <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
       <button class="icon-btn theme-toggle" onclick="toggleTheme()" id="chat-theme-btn" title="Toggle theme">🌙</button>
       <button class="icon-btn" onclick="newChat()" title="New chat" style="font-size:14px;font-weight:700;">＋</button>
-      <button class="icon-btn" onclick="resetToSetup()" title="Edit settings">⚙️</button>
+      <button class="icon-btn" onclick="openGoalsPanel()" title="Edit goals">⚙️</button>
     </div>
   </div>
 
@@ -995,6 +1070,104 @@
   <div class="readonly-badge">Read-only · Past session</div>
 </div>
 
+<!-- ═══════════════════════════════════════════════ GOALS PANEL -->
+<div id="goals-panel">
+  <div class="goals-header">
+    <button class="history-back-btn" onclick="closeGoalsPanel()">← Back to Chat</button>
+    <div class="goals-title">Edit Goals</div>
+    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+  <div class="goals-body">
+    <div class="goals-section-label">The Basics</div>
+    <div class="field">
+      <label>Your first name <span>*</span></label>
+      <input type="text" id="g-name" placeholder="e.g. Naya" />
+    </div>
+    <div class="field">
+      <label>Your big, specific goal <span>*</span></label>
+      <textarea id="g-goal" rows="2" placeholder='e.g. "Earn $100K from my freelance business and quit my 9-5 by December 2026"'></textarea>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Target date</label>
+        <input type="text" id="g-timeline" placeholder="e.g. December 2026" />
+      </div>
+      <div class="field">
+        <label>Your coach's name</label>
+        <input type="text" id="g-coach-name" placeholder="e.g. Future Naya" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Your "why"</label>
+      <textarea id="g-why" rows="2" placeholder="e.g. I want creative freedom and to stop building someone else's dream"></textarea>
+    </div>
+
+    <div class="goals-section-label">About You</div>
+    <div class="field">
+      <label>Current situation</label>
+      <textarea id="g-situation" rows="2" placeholder="e.g. Marketing coordinator, doing design work on the side"></textarea>
+    </div>
+    <div class="field">
+      <label>Past wins (one per line)</label>
+      <textarea id="g-wins" rows="3" placeholder="e.g. Got my first 3 paying clients&#10;Built a portfolio website"></textarea>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Your strengths</label>
+        <textarea id="g-strengths" rows="2" placeholder="e.g. Creativity, attention to detail"></textarea>
+      </div>
+      <div class="field">
+        <label>What you struggle with</label>
+        <textarea id="g-challenges" rows="2" placeholder="e.g. Pricing confidently, putting myself out there"></textarea>
+      </div>
+    </div>
+    <div class="field">
+      <label>Non-negotiables</label>
+      <textarea id="g-nonneg" rows="2" placeholder="e.g. Sleep 7+ hours, take Sundays off"></textarea>
+    </div>
+
+    <div class="goals-section-label">Milestones & Style</div>
+    <div class="field">
+      <div class="milestones-grid">
+        <div class="milestone-card">
+          <label>Q1 Focus</label>
+          <input type="text" id="g-q1" placeholder="e.g. Lay the foundation" />
+        </div>
+        <div class="milestone-card">
+          <label>Q2 Focus</label>
+          <input type="text" id="g-q2" placeholder="e.g. Build momentum" />
+        </div>
+        <div class="milestone-card">
+          <label>Q3 Focus</label>
+          <input type="text" id="g-q3" placeholder="e.g. Scale up" />
+        </div>
+        <div class="milestone-card">
+          <label>Q4 Focus</label>
+          <input type="text" id="g-q4" placeholder="e.g. Hit the finish line" />
+        </div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Coaching tone / style</label>
+      <select id="g-tone">
+        <option value="warm and direct, like a supportive big sister who won't let you quit">Warm &amp; Direct (Supportive big sister energy)</option>
+        <option value="calm and focused, like a seasoned executive coach">Calm &amp; Focused (Executive coach)</option>
+        <option value="hype and energetic, like an enthusiastic best friend who believes in you completely">Hype &amp; Energetic (Enthusiastic best friend)</option>
+        <option value="honest and no-nonsense, but always rooting for you">No-Nonsense (Real talk, always rooting for you)</option>
+        <option value="gentle and nurturing, like a wise mentor who leads with kindness">Gentle &amp; Nurturing (Wise mentor)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Anything else your coach should know?</label>
+      <textarea id="g-extra" rows="2" placeholder="e.g. I live in Austin, love coffee shops and yoga, tend to overthink things."></textarea>
+    </div>
+  </div>
+  <div class="goals-save-bar">
+    <button class="btn btn-primary" style="width:100%" onclick="saveGoalsPanel()">Save Changes</button>
+    <div id="goals-save-status"></div>
+  </div>
+</div>
+
 <script>
   let currentStep = 0;
   let systemPrompt = '';
@@ -1008,6 +1181,7 @@
   let deviceId = null;
   let historyCache = [];
   let pendingAttachment = null; // { type: 'image'|'pdf'|'link', data, mediaType, name, preview }
+  let recentSummaries = []; // populated before each new session launch
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
@@ -1061,6 +1235,7 @@
       if (el) el.addEventListener('input', saveSetup);
       if (el) el.addEventListener('change', saveSetup);
     });
+    syncGoalsFromSupabase(); // background — applies only if localStorage is empty
     if (restoreActiveConversation()) return;
     try {
       const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
@@ -1149,6 +1324,14 @@
   }
 
   function buildMemoryContext() {
+    // Prefer Supabase summaries (set in recentSummaries before launch).
+    // Fall back to raw localStorage sessions for users who haven't synced yet.
+    if (recentSummaries.length > 0) {
+      let memory = `\n\nPAST SESSION JOURNAL — you've coached ${userName} before. Here are summaries of recent sessions:\n`;
+      recentSummaries.forEach(s => { memory += `\n[${s.date}] ${s.summary}`; });
+      memory += `\n\nDraw on this naturally — reference what ${userName} has been working through. Don't announce that you're reading notes; just be present and continuous.`;
+      return memory;
+    }
     try {
       const sessions = JSON.parse(localStorage.getItem('futureMeSessions') || '[]');
       if (sessions.length === 0) return '';
@@ -1163,6 +1346,34 @@
       memory += `\nDraw on this naturally — reference past wins, struggles, or themes when relevant. Don't announce that you're reading notes; just be present and continuous.`;
       return memory;
     } catch(e) { return ''; }
+  }
+
+  async function fetchRecentSummaries() {
+    if (!deviceId) return [];
+    try {
+      const res = await fetch(`/api/sessions?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (!res.ok) return [];
+      const sessions = await res.json();
+      return sessions
+        .filter(s => s.summary && s.id !== supabaseSessionId)
+        .slice(0, 5)
+        .map(s => ({
+          date: new Date(s.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          summary: s.summary,
+        }));
+    } catch { return []; }
+  }
+
+  function summarizeSession(sessionId, messages, name) {
+    if (!sessionId || messages.length < 2) return;
+    const payload = messages
+      .filter(m => typeof m.content === 'string')
+      .slice(-10);
+    fetch('/api/summarize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessPassword, sessionId, messages: payload, userName: name }),
+    }).catch(() => {});
   }
 
   // ── ACTIVE CONVERSATION PERSISTENCE ────────────────────────
@@ -1297,6 +1508,7 @@
       dateStr: new Date(s.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
       title: s.title || 'Chat session',
       messageCount: s.message_count || 0,
+      summary: s.summary || '',
     }));
 
     const supabaseIds = new Set(supabaseSessions.map(s => s.id));
@@ -1338,6 +1550,7 @@
                 <span>${s.dateStr}</span>
                 <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
               </div>
+              ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -1444,6 +1657,85 @@
     }).catch(() => {});
   }
 
+  // ── GOALS PANEL ─────────────────────────────────────────────
+
+  // Map from goals-panel field IDs to setup screen field IDs
+  const GOALS_MAP = {
+    'g-name': 'name', 'g-goal': 'goal', 'g-timeline': 'timeline',
+    'g-coach-name': 'coach-name', 'g-why': 'why', 'g-situation': 'current-situation',
+    'g-wins': 'past-wins', 'g-strengths': 'strengths', 'g-challenges': 'challenges',
+    'g-nonneg': 'non-negotiables', 'g-tone': 'tone', 'g-extra': 'extra',
+    'g-q1': 'q1', 'g-q2': 'q2', 'g-q3': 'q3', 'g-q4': 'q4',
+  };
+
+  function openGoalsPanel() {
+    // Populate goals panel fields from current setup values
+    Object.entries(GOALS_MAP).forEach(([gId, setupId]) => {
+      const src = document.getElementById(setupId);
+      const dst = document.getElementById(gId);
+      if (src && dst) dst.value = src.value;
+    });
+    document.getElementById('goals-save-status').textContent = '';
+    document.getElementById('goals-panel').style.display = 'flex';
+  }
+
+  function closeGoalsPanel() {
+    document.getElementById('goals-panel').style.display = 'none';
+  }
+
+  function saveGoalsPanel() {
+    // Copy goals panel values back to setup fields
+    Object.entries(GOALS_MAP).forEach(([gId, setupId]) => {
+      const src = document.getElementById(gId);
+      const dst = document.getElementById(setupId);
+      if (src && dst) dst.value = src.value;
+    });
+
+    // Persist to localStorage
+    saveSetup();
+
+    // Sync to Supabase in background
+    const data = {};
+    FIELDS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) data[id] = el.value;
+    });
+    fetch('/api/goals', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessPassword, deviceId, data }),
+    }).catch(() => {});
+
+    const statusEl = document.getElementById('goals-save-status');
+    statusEl.textContent = 'Saved ✓ — changes apply to your next session';
+    statusEl.style.color = 'var(--success)';
+    setTimeout(() => {
+      statusEl.textContent = '';
+      statusEl.style.color = '';
+    }, 3000);
+  }
+
+  // On init, try to pull goals from Supabase and apply if localStorage is empty
+  async function syncGoalsFromSupabase() {
+    if (!deviceId) return;
+    try {
+      const hasLocal = FIELDS.some(id => {
+        const el = document.getElementById(id);
+        return el && el.value.trim();
+      });
+      if (hasLocal) return; // trust local over remote
+      const res = await fetch(`/api/goals?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (!res.ok) return;
+      const remote = await res.json();
+      if (!remote?.data) return;
+      Object.entries(remote.data).forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val;
+      });
+      saveSetup();
+    } catch {}
+  }
+
   // ── SYSTEM PROMPT ───────────────────────────────────────────
 
   function buildSystemPrompt() {
@@ -1529,11 +1821,15 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   // ── CHAT ────────────────────────────────────────────────────
 
   async function launch() {
-    systemPrompt = buildSystemPrompt();
-    coachName = document.getElementById('coach-name').value.trim() || `Future ${document.getElementById('name').value.trim()}`;
     userName = document.getElementById('name').value.trim();
+    coachName = document.getElementById('coach-name').value.trim() || `Future ${userName}`;
     currentSessionId = Date.now();
     clearActiveConversation();
+
+    // Fetch recent session summaries before building the system prompt
+    // so the coach has context from past conversations.
+    recentSummaries = await fetchRecentSummaries();
+    systemPrompt = buildSystemPrompt();
 
     document.getElementById('chat-name').textContent = coachName;
     document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
@@ -1763,6 +2059,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       const exchangeCount = Math.floor(conversationHistory.length / 2);
       syncMessagesToSupabase(supabaseSessionId, messagesToSync, exchangeCount);
       if (!isHidden && exchangeCount === 1) updateSupabaseSessionTitle(supabaseSessionId, getSessionTitle());
+      if (!isHidden) summarizeSession(supabaseSessionId, conversationHistory, userName);
 
     } catch (err) {
       typingEl.remove();

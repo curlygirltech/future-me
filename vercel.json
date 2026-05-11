@@ -1,6 +1,8 @@
 {
   "rewrites": [
-    { "source": "/api/chat", "destination": "/api/chat" }
+    { "source": "/api/chat", "destination": "/api/chat" },
+    { "source": "/api/sessions", "destination": "/api/sessions" },
+    { "source": "/api/sessions/:path*", "destination": "/api/sessions" }
   ]
 }
 

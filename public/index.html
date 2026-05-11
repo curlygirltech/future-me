@@ -1004,6 +1004,9 @@
   let isTyping = false;
   let accessPassword = localStorage.getItem('futureMePassword') || '';
   let currentSessionId = null;
+  let supabaseSessionId = null;
+  let deviceId = null;
+  let historyCache = [];
   let pendingAttachment = null; // { type: 'image'|'pdf'|'link', data, mediaType, name, preview }
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
@@ -1051,6 +1054,7 @@
   // ── APP INIT ────────────────────────────────────────────────
 
   function initApp() {
+    deviceId = getDeviceId();
     loadSetup();
     FIELDS.forEach(id => {
       const el = document.getElementById(id);
@@ -1168,6 +1172,7 @@
     try {
       localStorage.setItem('futureMeActiveChat', JSON.stringify({
         sessionId: currentSessionId,
+        supabaseSessionId,
         conversationHistory: stripBinaryContent(conversationHistory),
         userName,
         coachName,
@@ -1184,6 +1189,7 @@
       if (!data.conversationHistory || data.conversationHistory.length < 2) return false;
 
       currentSessionId = data.sessionId;
+      supabaseSessionId = data.supabaseSessionId || null;
       conversationHistory = data.conversationHistory;
       userName = data.userName;
       coachName = data.coachName;
@@ -1259,22 +1265,51 @@
     return 'Older';
   }
 
-  function openHistory() {
+  async function openHistory() {
     saveToHistory();
-    renderHistory();
     document.getElementById('history-panel').style.display = 'flex';
+    await renderHistory();
   }
 
   function closeHistory() {
     document.getElementById('history-panel').style.display = 'none';
   }
 
-  function renderHistory() {
+  async function renderHistory() {
     const body = document.getElementById('history-body');
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch(e) {}
+    body.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px">Loading…</div>';
 
-    if (history.length === 0) {
+    // Fetch from Supabase
+    let supabaseSessions = [];
+    try {
+      const res = await fetch(`/api/sessions?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (res.ok) supabaseSessions = await res.json();
+    } catch {}
+
+    // Fall back to localStorage for any sessions not yet in Supabase
+    let localHistory = [];
+    try { localHistory = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch {}
+
+    const supabaseFormatted = supabaseSessions.map(s => ({
+      id: s.id,
+      source: 'supabase',
+      timestamp: new Date(s.last_active_at || s.started_at).getTime(),
+      dateStr: new Date(s.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      title: s.title || 'Chat session',
+      messageCount: s.message_count || 0,
+    }));
+
+    const supabaseIds = new Set(supabaseSessions.map(s => s.id));
+    const localFormatted = localHistory
+      .filter(s => !supabaseIds.has(String(s.id)))
+      .map(s => ({ ...s, source: 'local' }));
+
+    const combined = [...supabaseFormatted, ...localFormatted]
+      .sort((a, b) => b.timestamp - a.timestamp);
+
+    historyCache = combined;
+
+    if (combined.length === 0) {
       body.innerHTML = `
         <div class="history-empty">
           <div class="empty-icon">💬</div>
@@ -1285,10 +1320,10 @@
 
     const groups = {};
     const order = ['Today', 'Yesterday', 'This Week', 'This Month', 'Older'];
-    history.forEach(session => {
-      const cat = getDateCategory(session.timestamp);
+    combined.forEach(s => {
+      const cat = getDateCategory(s.timestamp);
       if (!groups[cat]) groups[cat] = [];
-      groups[cat].push(session);
+      groups[cat].push(s);
     });
 
     body.innerHTML = order
@@ -1297,7 +1332,7 @@
         <div class="history-group">
           <div class="history-group-label">${cat}</div>
           ${groups[cat].map(s => `
-            <div class="history-item" onclick="viewSession(${s.id})">
+            <div class="history-item" onclick="viewSession('${s.id}', '${s.source}')">
               <div class="history-item-title">${escapeHtml(s.title)}</div>
               <div class="history-item-meta">
                 <span>${s.dateStr}</span>
@@ -1309,21 +1344,35 @@
       `).join('');
   }
 
-  function viewSession(id) {
-    let history = [];
-    try { history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch(e) {}
-    const session = history.find(s => s.id === id);
+  async function viewSession(id, source) {
+    const session = historyCache.find(s => String(s.id) === String(id));
     if (!session) return;
 
     document.getElementById('session-view-title').textContent = session.title;
     document.getElementById('session-view-date').textContent = session.dateStr;
+    document.getElementById('session-view').style.display = 'flex';
 
     const area = document.getElementById('session-messages');
     const savedUserName = JSON.parse(localStorage.getItem('futureMeSetup') || '{}')['name'] || 'You';
-    area.innerHTML = '';
+    area.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px">Loading…</div>';
 
-    session.messages
-      .filter(m => !m.content.startsWith('Hello! Introduce yourself'))
+    let messages = [];
+
+    if (source === 'supabase') {
+      try {
+        const res = await fetch(`/api/sessions/${id}/messages?accessPassword=${encodeURIComponent(accessPassword)}`);
+        if (res.ok) messages = await res.json();
+      } catch {}
+    } else {
+      let history = [];
+      try { history = JSON.parse(localStorage.getItem('futureMeHistory') || '[]'); } catch {}
+      const local = history.find(s => String(s.id) === String(id));
+      messages = local?.messages || [];
+    }
+
+    area.innerHTML = '';
+    messages
+      .filter(m => typeof m.content === 'string' && !m.content.startsWith('Hello! Introduce yourself'))
       .forEach(m => {
         const el = document.createElement('div');
         el.className = `message ${m.role === 'user' ? 'user' : 'ai'}`;
@@ -1341,7 +1390,9 @@
         area.appendChild(el);
       });
 
-    document.getElementById('session-view').style.display = 'flex';
+    if (messages.length === 0) {
+      area.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:13px">No messages found.</div>';
+    }
   }
 
   function closeSessionView() {
@@ -1350,6 +1401,47 @@
 
   function escapeHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── DEVICE ID ───────────────────────────────────────────────
+
+  function getDeviceId() {
+    let id = localStorage.getItem('futureMeDeviceId');
+    if (!id) { id = crypto.randomUUID(); localStorage.setItem('futureMeDeviceId', id); }
+    return id;
+  }
+
+  // ── SUPABASE SYNC ────────────────────────────────────────────
+
+  async function createSupabaseSession() {
+    try {
+      const res = await fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accessPassword, deviceId }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.id || null;
+    } catch { return null; }
+  }
+
+  function syncMessagesToSupabase(sessionId, messages, messageCount) {
+    if (!sessionId) return;
+    fetch(`/api/sessions/${sessionId}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessPassword, messages, messageCount }),
+    }).catch(() => {});
+  }
+
+  function updateSupabaseSessionTitle(sessionId, title) {
+    if (!sessionId || !title) return;
+    fetch(`/api/sessions/${sessionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ accessPassword, title }),
+    }).catch(() => {});
   }
 
   // ── SYSTEM PROMPT ───────────────────────────────────────────
@@ -1436,7 +1528,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
   // ── CHAT ────────────────────────────────────────────────────
 
-  function launch() {
+  async function launch() {
     systemPrompt = buildSystemPrompt();
     coachName = document.getElementById('coach-name').value.trim() || `Future ${document.getElementById('name').value.trim()}`;
     userName = document.getElementById('name').value.trim();
@@ -1448,6 +1540,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('chat-screen').style.display = 'flex';
 
+    supabaseSessionId = await createSupabaseSession();
     sendOpeningMessage();
   }
 
@@ -1663,6 +1756,14 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       appendMessage('ai', reply);
       saveActiveConversation();
 
+      // Background sync to Supabase — fire and forget
+      const messagesToSync = isHidden
+        ? [{ role: 'assistant', content: reply }]
+        : [{ role: 'user', content: typeof userContent === 'string' ? userContent : JSON.stringify(userContent) }, { role: 'assistant', content: reply }];
+      const exchangeCount = Math.floor(conversationHistory.length / 2);
+      syncMessagesToSupabase(supabaseSessionId, messagesToSync, exchangeCount);
+      if (!isHidden && exchangeCount === 1) updateSupabaseSessionTitle(supabaseSessionId, getSessionTitle());
+
     } catch (err) {
       typingEl.remove();
       showError(err.message);
@@ -1752,7 +1853,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
       </div>`;
   }
 
-  function newChat() {
+  async function newChat() {
     if (!confirm('Start a new chat? Your current conversation will be saved to history.')) return;
     saveCurrentSession();
     saveToHistory();
@@ -1760,6 +1861,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     conversationHistory = [];
     currentSessionId = Date.now();
     document.getElementById('messages').innerHTML = '';
+    supabaseSessionId = await createSupabaseSession();
     sendOpeningMessage();
   }
 

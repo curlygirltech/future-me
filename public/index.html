@@ -2798,7 +2798,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
         body: JSON.stringify({
           accessPassword,
           system: sanitize(systemPrompt),
-          messages: conversationHistory.map(m => ({
+          messages: conversationHistory.slice(-12).map(m => ({
             ...m,
             content: typeof m.content === 'string'
               ? sanitize(m.content)

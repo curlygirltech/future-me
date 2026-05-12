@@ -180,7 +180,7 @@ describe('Anthropic API forwarding', () => {
     const [, options] = fetchMock.mock.calls[0].arguments;
     const body = JSON.parse(options.body);
     assert.equal(body.model, 'claude-sonnet-4-6');
-    assert.equal(body.max_tokens, 2048);
+    assert.equal(body.max_tokens, 1024);
   });
 
   it('forwards the Anthropic API response status and body', async () => {

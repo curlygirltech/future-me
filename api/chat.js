@@ -47,7 +47,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
+        max_tokens: 1024,
         system: systemBlocks,
         messages: cachedMessages,
       }),

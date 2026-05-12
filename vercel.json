@@ -7,6 +7,7 @@
     { "source": "/api/resources",         "destination": "/api/resources" },
     { "source": "/api/resources/:path*",  "destination": "/api/resources" },
     { "source": "/api/sessions",          "destination": "/api/sessions" },
-    { "source": "/api/sessions/:path*",   "destination": "/api/sessions" }
+    { "source": "/api/sessions/:path*",   "destination": "/api/sessions" },
+    { "source": "/api/dashboard",         "destination": "/api/dashboard" }
   ]
 }

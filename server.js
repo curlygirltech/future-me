@@ -8,6 +8,7 @@ import summarizeHandler from './api/summarize.js';
 import goalsHandler from './api/goals.js';
 import patternsHandler from './api/patterns.js';
 import resourcesHandler from './api/resources.js';
+import dashboardHandler from './api/dashboard.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
@@ -76,6 +77,7 @@ const server = http.createServer(async (req, res) => {
   if (req.url.startsWith('/api/resources')) return dispatch(resourcesHandler, req, res, {});
   if (req.url.startsWith('/api/goals'))     return dispatch(goalsHandler,     req, res, {});
   if (req.url.startsWith('/api/patterns'))  return dispatch(patternsHandler,  req, res, {});
+  if (req.url.startsWith('/api/dashboard')) return dispatch(dashboardHandler, req, res, {});
 
   // Static files
   const filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);

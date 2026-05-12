@@ -934,6 +934,175 @@
       transition: color 0.3s;
     }
 
+    /* ── PROGRESS PANEL ──────────────────────────────── */
+    #progress-panel {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 102;
+      flex-direction: column;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .progress-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+
+    .progress-title { flex: 1; font-weight: 600; font-size: 15px; }
+
+    .progress-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px 32px;
+    }
+    .progress-body::-webkit-scrollbar { width: 4px; }
+    .progress-body::-webkit-scrollbar-track { background: transparent; }
+    .progress-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .stat-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 16px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: 'DM Serif Display', serif;
+      font-size: 38px;
+      line-height: 1;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .focus-block {
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .focus-eyebrow {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .focus-text {
+      font-family: 'DM Serif Display', serif;
+      font-size: 21px;
+      line-height: 1.35;
+      color: var(--text);
+    }
+
+    .focus-empty {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    .patterns-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .pattern-col {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .pattern-col-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .pattern-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .pattern-chip {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .pattern-chip.struggle {
+      border-color: var(--accent2);
+      color: var(--accent2);
+      background: transparent;
+    }
+
+    .session-timeline { display: flex; flex-direction: column; gap: 8px; }
+
+    .session-tl-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      transition: border-color 0.2s;
+    }
+    .session-tl-item:hover { border-color: var(--accent2); }
+
+    .session-tl-date {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .session-tl-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .session-tl-summary {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
     /* ── RESOURCES PANEL ──────────────────────────────── */
     #resources-panel {
       display: none;
@@ -1362,6 +1531,7 @@
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
+      <button class="icon-btn" onclick="openProgressPanel()" title="Progress">📊</button>
       <button class="icon-btn" onclick="openResourcesPanel()" title="Resources">📚</button>
       <button class="icon-btn" onclick="newChat()" title="New chat" style="font-size:14px;font-weight:700;">＋</button>
       <button class="icon-btn" onclick="openGoalsPanel()" title="Edit goals">⚙️</button>
@@ -1515,6 +1685,18 @@
   <div class="goals-save-bar">
     <button class="btn btn-primary" style="width:100%" onclick="saveGoalsPanel()">Save Changes</button>
     <div id="goals-save-status"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ PROGRESS PANEL -->
+<div id="progress-panel">
+  <div class="progress-header">
+    <button class="history-back-btn" onclick="closeProgressPanel()">← Back to Chat</button>
+    <div class="progress-title">Your Progress</div>
+    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+  <div class="progress-body" id="progress-body">
+    <div class="resources-empty">Loading your progress…</div>
   </div>
 </div>
 
@@ -2206,6 +2388,92 @@
     'g-nonneg': 'non-negotiables', 'g-tone': 'tone', 'g-extra': 'extra',
     'g-q1': 'q1', 'g-q2': 'q2', 'g-q3': 'q3', 'g-q4': 'q4',
   };
+
+  // ── PROGRESS DASHBOARD ──────────────────────────────────────
+
+  async function openProgressPanel() {
+    document.getElementById('progress-panel').style.display = 'flex';
+    await fetchDashboard();
+  }
+
+  function closeProgressPanel() {
+    document.getElementById('progress-panel').style.display = 'none';
+  }
+
+  async function fetchDashboard() {
+    const body = document.getElementById('progress-body');
+    body.innerHTML = '<div class="resources-empty">Loading…</div>';
+    try {
+      const res = await fetch(`/api/dashboard?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      if (!res.ok) { body.innerHTML = '<div class="resources-empty">Couldn\'t load your progress. Try again.</div>'; return; }
+      renderDashboard(await res.json());
+    } catch {
+      body.innerHTML = '<div class="resources-empty">Couldn\'t load your progress. Try again.</div>';
+    }
+  }
+
+  function renderDashboard({ streak, patterns, recentSessions }) {
+    const body = document.getElementById('progress-body');
+    const wins = patterns?.wins?.length ?? 0;
+
+    const streakHtml = streak > 0
+      ? `<div class="stat-number">🔥 ${streak}</div><div class="stat-label">${streak === 1 ? 'Day' : 'Day'} Streak</div>`
+      : `<div class="stat-number" style="font-size:24px;margin-bottom:8px">—</div><div class="stat-label">Start your streak today</div>`;
+
+    const winsHtml = wins > 0
+      ? `<div class="stat-number">🏆 ${wins}</div><div class="stat-label">Wins Logged</div>`
+      : `<div class="stat-number" style="font-size:24px;margin-bottom:8px">—</div><div class="stat-label">Wins will appear here</div>`;
+
+    const focusHtml = patterns?.current_focus
+      ? `<div class="focus-text">${escapeHtml(patterns.current_focus)}</div>`
+      : `<div class="focus-empty">Your current focus will emerge after a few more sessions with your coach.</div>`;
+
+    const themesHtml = patterns?.themes?.length
+      ? patterns.themes.map(t => `<span class="pattern-chip">${escapeHtml(t)}</span>`).join('')
+      : `<span style="font-size:12px;color:var(--text-muted);font-style:italic">Building…</span>`;
+
+    const strugglesHtml = patterns?.struggles?.length
+      ? patterns.struggles.map(s => `<span class="pattern-chip struggle">${escapeHtml(s)}</span>`).join('')
+      : `<span style="font-size:12px;color:var(--text-muted);font-style:italic">Building…</span>`;
+
+    const sessionsHtml = recentSessions.length
+      ? recentSessions.map(s => {
+          const date = new Date(s.started_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+          return `
+            <div class="session-tl-item">
+              <div class="session-tl-date">${date}</div>
+              <div class="session-tl-title">${escapeHtml(s.title || 'Coaching Session')}</div>
+              ${s.summary ? `<div class="session-tl-summary">${escapeHtml(s.summary)}</div>` : ''}
+            </div>`;
+        }).join('')
+      : `<div style="font-size:13px;color:var(--text-muted);font-style:italic;text-align:center;padding:20px 0">Session summaries will appear here after your next conversation.</div>`;
+
+    body.innerHTML = `
+      <div class="stat-strip">
+        <div class="stat-card">${streakHtml}</div>
+        <div class="stat-card">${winsHtml}</div>
+      </div>
+
+      <div class="focus-block">
+        <div class="focus-eyebrow">Current Focus</div>
+        ${focusHtml}
+      </div>
+
+      <div class="patterns-grid">
+        <div class="pattern-col">
+          <div class="pattern-col-label">Themes</div>
+          <div class="pattern-chips">${themesHtml}</div>
+        </div>
+        <div class="pattern-col">
+          <div class="pattern-col-label">Working Through</div>
+          <div class="pattern-chips">${strugglesHtml}</div>
+        </div>
+      </div>
+
+      <div class="resources-section-label">Recent Sessions</div>
+      <div class="session-timeline">${sessionsHtml}</div>
+    `;
+  }
 
   // ── PATTERNS ────────────────────────────────────────────────
 

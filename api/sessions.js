@@ -48,7 +48,7 @@ export function createSessionsHandler(db) {
         const showArchived = url.searchParams.get('archived') === 'true';
         const { data, error } = await db
           .from('sessions')
-          .select('id, title, started_at, last_active_at, message_count, summary, archived_at')
+          .select('id, title, started_at, last_active_at, message_count, summary, archived_at, category')
           .eq('device_id', deviceId)
           .is('deleted_at', null)
           .eq('is_archived', showArchived)
@@ -71,6 +71,7 @@ export function createSessionsHandler(db) {
           updates.is_archived = false;
           updates.archived_at = null;
         }
+        if (req.body.category !== undefined) updates.category = req.body.category;
         const { error } = await db.from('sessions').update(updates).eq('id', parts[0]);
         if (error) return res.status(500).json({ error: 'Database error' });
         return res.status(200).json({ ok: true });

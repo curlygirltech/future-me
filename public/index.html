@@ -849,14 +849,68 @@
     .session-messages-area::-webkit-scrollbar-track { background: transparent; }
     .session-messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    .readonly-badge {
-      text-align: center;
-      padding: 8px 16px;
-      font-size: 12px;
-      color: var(--text-muted);
+    .session-view-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
       border-top: 1px solid var(--border);
       background: var(--surface);
       flex-shrink: 0;
+    }
+    .session-view-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .continue-chat-btn {
+      padding: 8px 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .continue-chat-btn:hover { opacity: 0.85; }
+
+    /* ── CATEGORY FILTER BAR ──────────────────────────────── */
+    .category-filter-bar {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 10px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .category-filter-bar:empty { display: none; }
+    .cat-chip {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .cat-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .cat-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+    /* ── HISTORY ITEM CATEGORY BADGE ─────────────────────── */
+    .history-item-category {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      margin-top: 5px;
+      font-weight: 500;
     }
 
     /* ── HISTORY ITEM SUMMARY ─────────────────────────────── */
@@ -1574,6 +1628,7 @@
     <div class="history-title">Chat History</div>
     <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
   </div>
+  <div id="category-filter-bar" class="category-filter-bar"></div>
   <div class="history-body" id="history-body"></div>
 </div>
 
@@ -1587,7 +1642,10 @@
     </div>
   </div>
   <div class="session-messages-area" id="session-messages"></div>
-  <div class="readonly-badge">Read-only · Past session</div>
+  <div class="session-view-footer">
+    <span class="session-view-hint">Past session</span>
+    <button class="continue-chat-btn" onclick="resumeSession()">Continue this chat →</button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════ GOALS PANEL -->
@@ -1759,6 +1817,10 @@
   let resourcesTagFilter = null;
   let editingResourceId = null;
   let selectedResourceType = 'link';
+  let historyCategory = null;
+  let currentViewedMessages = [];
+  let currentViewedId = null;
+  let currentViewedSource = null;
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
@@ -2125,6 +2187,7 @@
       messageCount: s.message_count || 0,
       summary: s.summary || '',
       archived_at: s.archived_at || null,
+      category: s.category || null,
     }));
 
     const supabaseIds = new Set(supabaseSessions.map(s => s.id));
@@ -2136,8 +2199,13 @@
       .sort((a, b) => b.timestamp - a.timestamp);
 
     historyCache = combined;
+    renderCategoryFilter();
 
-    if (combined.length === 0) {
+    const visible = historyCategory
+      ? combined.filter(s => s.category === historyCategory)
+      : combined;
+
+    if (visible.length === 0) {
       const emptyMsg = showingArchived
         ? '<p>No archived chats.</p>'
         : '<p>No saved chats yet.<br/>Your conversations will appear here after you finish a session.</p>';
@@ -2154,7 +2222,7 @@
 
     const groups = {};
     const order = ['Today', 'Yesterday', 'This Week', 'This Month', 'Older'];
-    combined.forEach(s => {
+    visible.forEach(s => {
       const cat = getDateCategory(s.timestamp);
       if (!groups[cat]) groups[cat] = [];
       groups[cat].push(s);
@@ -2165,6 +2233,7 @@
         <button class="history-item-menu-btn" onclick="toggleHistoryMenu(event,'${s.id}')" title="Options">···</button>
         <div class="history-item-dropdown" id="menu-${s.id}">
           <button class="history-action" onclick="renameSession(event,'${s.id}','${s.source}')">✏️ Rename</button>
+          <button class="history-action" onclick="setCategorySession(event,'${s.id}','${s.source}')">🏷 Categorize</button>
           <button class="history-action" onclick="archiveSession(event,'${s.id}','${s.source}',${!!s.archived_at})">${s.archived_at ? '📤 Unarchive' : '📥 Archive'}</button>
           <button class="history-action danger" onclick="deleteSession(event,'${s.id}','${s.source}')">🗑 Delete</button>
         </div>
@@ -2172,6 +2241,7 @@
         <div class="history-item-meta">
           <span>${s.dateStr}</span>
           <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
+          ${s.category ? `<span class="history-item-category">${escapeHtml(s.category)}</span>` : ''}
         </div>
         ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
       </div>`;
@@ -2283,6 +2353,10 @@
     const session = historyCache.find(s => String(s.id) === String(id));
     if (!session) return;
 
+    currentViewedId = id;
+    currentViewedSource = source;
+    currentViewedMessages = [];
+
     document.getElementById('session-view-title').textContent = session.title;
     document.getElementById('session-view-date').textContent = session.dateStr;
     document.getElementById('session-view').style.display = 'flex';
@@ -2304,6 +2378,8 @@
       const local = history.find(s => String(s.id) === String(id));
       messages = local?.messages || [];
     }
+
+    currentViewedMessages = messages;
 
     area.innerHTML = '';
     messages
@@ -2332,6 +2408,132 @@
 
   function closeSessionView() {
     document.getElementById('session-view').style.display = 'none';
+    currentViewedId = null;
+    currentViewedSource = null;
+    currentViewedMessages = [];
+  }
+
+  function renderCategoryFilter() {
+    const bar = document.getElementById('category-filter-bar');
+    if (!bar) return;
+    const cats = [...new Set(historyCache.map(s => s.category).filter(Boolean))].sort();
+    if (cats.length === 0) { bar.innerHTML = ''; return; }
+    bar.innerHTML = cats.map(c =>
+      `<button class="cat-chip${c === historyCategory ? ' active' : ''}" onclick="setHistoryCategory(this.dataset.cat)" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+    ).join('');
+  }
+
+  function setHistoryCategory(cat) {
+    historyCategory = historyCategory === cat ? null : cat;
+    renderCategoryFilter();
+    // Re-render the body with the new filter applied
+    const combined = historyCache;
+    const visible = historyCategory ? combined.filter(s => s.category === historyCategory) : combined;
+    const body = document.getElementById('history-body');
+    const groups = {};
+    const order = ['Today', 'Yesterday', 'This Week', 'This Month', 'Older'];
+    visible.forEach(s => {
+      const g = getDateCategory(s.timestamp);
+      if (!groups[g]) groups[g] = [];
+      groups[g].push(s);
+    });
+    const renderItem = (s) => `
+      <div class="history-item" id="hist-${s.id}" onclick="handleHistoryItemClick(event,'${s.id}','${s.source}')">
+        <button class="history-item-menu-btn" onclick="toggleHistoryMenu(event,'${s.id}')" title="Options">···</button>
+        <div class="history-item-dropdown" id="menu-${s.id}">
+          <button class="history-action" onclick="renameSession(event,'${s.id}','${s.source}')">✏️ Rename</button>
+          <button class="history-action" onclick="setCategorySession(event,'${s.id}','${s.source}')">🏷 Categorize</button>
+          <button class="history-action" onclick="archiveSession(event,'${s.id}','${s.source}',${!!s.archived_at})">${s.archived_at ? '📤 Unarchive' : '📥 Archive'}</button>
+          <button class="history-action danger" onclick="deleteSession(event,'${s.id}','${s.source}')">🗑 Delete</button>
+        </div>
+        <div class="history-item-title">${escapeHtml(s.title)}</div>
+        <div class="history-item-meta">
+          <span>${s.dateStr}</span>
+          <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
+          ${s.category ? `<span class="history-item-category">${escapeHtml(s.category)}</span>` : ''}
+        </div>
+        ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
+      </div>`;
+    body.innerHTML = (visible.length === 0
+      ? `<div class="history-empty"><div class="empty-icon">🔍</div><p>No chats in "${historyCategory}".</p></div>`
+      : order.filter(cat => groups[cat]).map(cat => `
+          <div class="history-group">
+            <div class="history-group-label">${cat}</div>
+            ${groups[cat].map(renderItem).join('')}
+          </div>`).join('')) +
+      `<div class="archived-toggle" onclick="toggleArchivedView()">
+        ${showingArchived ? '← Back to active chats' : '📁 View archived chats'}
+      </div>`;
+  }
+
+  async function setCategorySession(e, id, source) {
+    e.stopPropagation();
+    closeAllHistoryMenus();
+    const session = historyCache.find(s => String(s.id) === String(id));
+    const current = session?.category || '';
+    const input = prompt('Category (leave blank to remove):', current);
+    if (input === null) return;
+    const category = input.trim() || null;
+    if (session) session.category = category;
+    // Update badge in place
+    const el = document.getElementById(`hist-${id}`);
+    if (el) {
+      const meta = el.querySelector('.history-item-meta');
+      const existing = meta?.querySelector('.history-item-category');
+      if (existing) existing.remove();
+      if (category && meta) {
+        const badge = document.createElement('span');
+        badge.className = 'history-item-category';
+        badge.textContent = category;
+        meta.appendChild(badge);
+      }
+    }
+    renderCategoryFilter();
+    if (source === 'supabase') {
+      fetch(`/api/sessions/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+        body: JSON.stringify({ category }),
+      }).catch(() => {});
+    }
+  }
+
+  async function resumeSession() {
+    if (!currentViewedId || !currentViewedMessages.length) return;
+    if (!confirm('Resume this chat? Your current conversation will be saved to history.')) return;
+
+    const id = currentViewedId;
+    const source = currentViewedSource;
+
+    saveCurrentSession();
+    saveToHistory();
+    clearActiveConversation();
+
+    conversationHistory = currentViewedMessages
+      .filter(m => typeof m.content === 'string')
+      .map(m => ({ role: m.role, content: m.content }));
+
+    supabaseSessionId = source === 'supabase' ? id : null;
+    currentSessionId = source === 'supabase' ? id : Date.now();
+
+    [recentSummaries] = await Promise.all([
+      fetchRecentSummaries(),
+      fetchCurrentPatterns(),
+      fetchPinnedResources(),
+    ]);
+    systemPrompt = buildSystemPrompt();
+
+    document.getElementById('messages').innerHTML = '';
+    conversationHistory
+      .filter(m => !m.content.startsWith('Hello! Introduce yourself'))
+      .forEach(m => appendMessage(m.role === 'user' ? 'user' : 'ai', m.content));
+
+    closeSessionView();
+    closeHistory();
+
+    const msgs = document.getElementById('messages');
+    msgs.scrollTop = msgs.scrollHeight;
+    document.getElementById('user-input').focus();
   }
 
   function escapeHtml(str) {

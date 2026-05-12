@@ -24,7 +24,7 @@ describe('CORS', () => {
     await handler(makeReq('OPTIONS', '/api/sessions'), res);
     assert.equal(res.headers['Access-Control-Allow-Origin'], '*');
     assert.ok(res.headers['Access-Control-Allow-Methods'].includes('DELETE'));
-    assert.equal(res.headers['Access-Control-Allow-Headers'], 'Content-Type');
+    assert.ok(res.headers['Access-Control-Allow-Headers'].includes('x-access-password'));
   });
 
   it('returns 200 for OPTIONS preflight', async () => {
@@ -47,22 +47,22 @@ describe('Authentication', () => {
 
   it('returns 401 when password does not match', async () => {
     const res = makeRes();
-    await handler(makeReq('GET', '/api/sessions', { accessPassword: 'wrong' }), res);
+    await handler(makeReq('GET', '/api/sessions', {}, { 'x-access-password': 'wrong' }), res);
     assert.equal(res.statusCode, 401);
     assert.equal(res.body.error, 'Unauthorized');
   });
 
-  it('returns 401 when password is missing from body', async () => {
+  it('returns 401 when password header is missing', async () => {
     const res = makeRes();
-    await handler({ method: 'GET', url: '/api/sessions', body: {} }, res);
+    await handler({ method: 'GET', url: '/api/sessions', body: {}, headers: {} }, res);
     assert.equal(res.statusCode, 401);
   });
 
-  it('accepts password from query string', async () => {
+  it('accepts password from x-access-password header', async () => {
     const db = makeMockDb({ sessions: { select: { data: [], error: null } } });
     handler = createSessionsHandler(db);
     const res = makeRes();
-    await handler({ method: 'GET', url: '/api/sessions?accessPassword=secret&deviceId=d1', body: {} }, res);
+    await handler(makeReq('GET', '/api/sessions?deviceId=d1', {}, { 'x-access-password': 'secret' }), res);
     assert.equal(res.statusCode, 200);
   });
 });
@@ -97,7 +97,7 @@ describe('POST /api/sessions — create session', () => {
     const res = makeRes();
     await handler(makeReq('POST', '/api/sessions'), res);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.body.error, 'DB error');
+    assert.equal(res.body.error, 'Database error');
   });
 });
 
@@ -129,7 +129,7 @@ describe('GET /api/sessions — list sessions', () => {
     const res = makeRes();
     await handler(makeReq('GET', '/api/sessions'), res);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.body.error, 'query failed');
+    assert.equal(res.body.error, 'Database error');
   });
 });
 
@@ -170,7 +170,7 @@ describe('PATCH /api/sessions/:id — update session', () => {
     const res = makeRes();
     await handler(makeReq('PATCH', '/api/sessions/sess-1', { title: 'x' }), res);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.body.error, 'update failed');
+    assert.equal(res.body.error, 'Database error');
   });
 });
 
@@ -208,7 +208,7 @@ describe('DELETE /api/sessions/:id — soft-delete', () => {
     const res = makeRes();
     await handler(makeReq('DELETE', '/api/sessions/sess-1'), res);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.body.error, 'delete failed');
+    assert.equal(res.body.error, 'Database error');
   });
 });
 
@@ -329,7 +329,7 @@ describe('POST /api/sessions/:id/messages — append messages', () => {
     const messages = [{ role: 'user', content: 'Hello' }];
     await handler(makeReq('POST', '/api/sessions/sess-1/messages', { messages }), res);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.body.error, 'insert failed');
+    assert.equal(res.body.error, 'Database error');
   });
 });
 
@@ -364,7 +364,7 @@ describe('GET /api/sessions/:id/messages — fetch messages', () => {
     const res = makeRes();
     await handler(makeReq('GET', '/api/sessions/sess-1/messages'), res);
     assert.equal(res.statusCode, 500);
-    assert.equal(res.body.error, 'read error');
+    assert.equal(res.body.error, 'Database error');
   });
 });
 

@@ -36,7 +36,7 @@ describe('CORS', () => {
 describe('Authentication', () => {
   it('returns 401 with wrong password', async () => {
     const res = makeRes();
-    await handler(makeReq('GET', '/api/dashboard', { accessPassword: 'bad' }), res);
+    await handler(makeReq('GET', '/api/dashboard', {}, { 'x-access-password': 'bad' }), res);
     assert.equal(res.statusCode, 401);
   });
 
@@ -171,7 +171,7 @@ describe('GET /api/dashboard', () => {
 
   it('returns 500 on sessions DB error', async () => {
     const db = makeMockDb({
-      sessions: { select: { data: null, error: { message: 'db failure' } } },
+      sessions: { select: { data: null, error: { message: 'db failure', code: 'OTHER' } } },
       patterns: { select: { data: null, error: { code: 'PGRST116', message: 'not found' } } },
     });
     handler = createDashboardHandler(db);

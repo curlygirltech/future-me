@@ -1959,7 +1959,9 @@
   async function fetchRecentSummaries() {
     if (!deviceId) return [];
     try {
-      const res = await fetch(`/api/sessions?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const res = await fetch(`/api/sessions?deviceId=${encodeURIComponent(deviceId)}`, {
+        headers: { 'x-access-password': accessPassword },
+      });
       if (!res.ok) return [];
       const sessions = await res.json();
       return sessions
@@ -1979,8 +1981,8 @@
       .slice(-10);
     fetch('/api/summarize', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessPassword, sessionId, messages: payload, userName: name }),
+      headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+      body: JSON.stringify({ sessionId, messages: payload, userName: name }),
     }).catch(() => {});
   }
 
@@ -2103,8 +2105,8 @@
     // Fetch from Supabase (active or archived based on showingArchived toggle)
     let supabaseSessions = [];
     try {
-      const params = `accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}${showingArchived ? '&archived=true' : ''}`;
-      const res = await fetch(`/api/sessions?${params}`);
+      const params = `deviceId=${encodeURIComponent(deviceId)}${showingArchived ? '&archived=true' : ''}`;
+      const res = await fetch(`/api/sessions?${params}`, { headers: { 'x-access-password': accessPassword } });
       if (res.ok) supabaseSessions = await res.json();
     } catch {}
 
@@ -2231,8 +2233,8 @@
     if (source === 'supabase') {
       fetch(`/api/sessions/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessPassword, title }),
+        headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+        body: JSON.stringify({ title }),
       }).catch(() => {});
     } else {
       try {
@@ -2252,8 +2254,8 @@
     if (source === 'supabase') {
       fetch(`/api/sessions/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessPassword, archived: !isCurrentlyArchived }),
+        headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+        body: JSON.stringify({ archived: !isCurrentlyArchived }),
       }).catch(() => {});
     }
   }
@@ -2267,8 +2269,7 @@
     if (source === 'supabase') {
       fetch(`/api/sessions/${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessPassword }),
+        headers: { 'x-access-password': accessPassword },
       }).catch(() => {});
     } else {
       try {
@@ -2294,7 +2295,7 @@
 
     if (source === 'supabase') {
       try {
-        const res = await fetch(`/api/sessions/${id}/messages?accessPassword=${encodeURIComponent(accessPassword)}`);
+        const res = await fetch(`/api/sessions/${id}/messages`, { headers: { 'x-access-password': accessPassword } });
         if (res.ok) messages = await res.json();
       } catch {}
     } else {
@@ -2334,7 +2335,7 @@
   }
 
   function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
   // ── DEVICE ID ───────────────────────────────────────────────
@@ -2351,8 +2352,8 @@
     try {
       const res = await fetch('/api/sessions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessPassword, deviceId }),
+        headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+        body: JSON.stringify({ deviceId }),
       });
       if (!res.ok) return null;
       const data = await res.json();
@@ -2364,8 +2365,8 @@
     if (!sessionId) return;
     fetch(`/api/sessions/${sessionId}/messages`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessPassword, messages, messageCount }),
+      headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+      body: JSON.stringify({ messages, messageCount }),
     }).catch(() => {});
   }
 
@@ -2373,8 +2374,8 @@
     if (!sessionId || !title) return;
     fetch(`/api/sessions/${sessionId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessPassword, title }),
+      headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+      body: JSON.stringify({ title }),
     }).catch(() => {});
   }
 
@@ -2404,7 +2405,9 @@
     const body = document.getElementById('progress-body');
     body.innerHTML = '<div class="resources-empty">Loading…</div>';
     try {
-      const res = await fetch(`/api/dashboard?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const res = await fetch(`/api/dashboard?deviceId=${encodeURIComponent(deviceId)}`, {
+        headers: { 'x-access-password': accessPassword },
+      });
       if (!res.ok) { body.innerHTML = '<div class="resources-empty">Couldn\'t load your progress. Try again.</div>'; return; }
       renderDashboard(await res.json());
     } catch {
@@ -2480,7 +2483,9 @@
   async function fetchCurrentPatterns() {
     if (!deviceId) return;
     try {
-      const res = await fetch(`/api/patterns?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const res = await fetch(`/api/patterns?deviceId=${encodeURIComponent(deviceId)}`, {
+        headers: { 'x-access-password': accessPassword },
+      });
       if (!res.ok) return;
       currentPatterns = await res.json();
     } catch {}
@@ -2490,8 +2495,8 @@
     if (!deviceId) return;
     fetch('/api/patterns', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessPassword, deviceId }),
+      headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+      body: JSON.stringify({ deviceId }),
     }).then(async r => {
       if (r.ok) {
         const data = await r.json();
@@ -2505,7 +2510,9 @@
   async function fetchPinnedResources() {
     if (!deviceId) return;
     try {
-      const res = await fetch(`/api/resources?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const res = await fetch(`/api/resources?deviceId=${encodeURIComponent(deviceId)}`, {
+        headers: { 'x-access-password': accessPassword },
+      });
       if (!res.ok) return;
       const all = await res.json();
       pinnedResources = all.filter(r => r.is_pinned);
@@ -2526,7 +2533,9 @@
 
   async function loadResources() {
     try {
-      const res = await fetch(`/api/resources?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const res = await fetch(`/api/resources?deviceId=${encodeURIComponent(deviceId)}`, {
+        headers: { 'x-access-password': accessPassword },
+      });
       if (!res.ok) return;
       allResources = await res.json();
       renderResources();
@@ -2540,7 +2549,7 @@
     const tagSet = new Set();
     allResources.forEach(r => (r.tags || []).forEach(t => tagSet.add(t)));
     tagBar.innerHTML = Array.from(tagSet).sort().map(t =>
-      `<button class="tag-chip${t === resourcesTagFilter ? ' active' : ''}" onclick="setTagFilter('${escapeHtml(t)}')">${escapeHtml(t)}</button>`
+      `<button class="tag-chip${t === resourcesTagFilter ? ' active' : ''}" onclick="setTagFilter(this.dataset.tag)" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>`
     ).join('');
 
     const filtered = resourcesTagFilter
@@ -2660,16 +2669,16 @@
       if (editingResourceId) {
         await fetch(`/api/resources/${editingResourceId}`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessPassword, title, content, tags, is_pinned }),
+          headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+          body: JSON.stringify({ title, content, tags, is_pinned }),
         });
         const idx = allResources.findIndex(r => r.id === editingResourceId);
         if (idx >= 0) allResources[idx] = { ...allResources[idx], title, content, tags, is_pinned };
       } else {
         const res = await fetch('/api/resources', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ accessPassword, deviceId, type: selectedResourceType, title, content, tags, is_pinned }),
+          headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+          body: JSON.stringify({ deviceId, type: selectedResourceType, title, content, tags, is_pinned }),
         });
         if (res.ok) {
           const created = await res.json();
@@ -2687,8 +2696,8 @@
     try {
       await fetch(`/api/resources/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessPassword, is_pinned }),
+        headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+        body: JSON.stringify({ is_pinned }),
       });
       const idx = allResources.findIndex(r => r.id === id);
       if (idx >= 0) allResources[idx] = { ...allResources[idx], is_pinned };
@@ -2702,8 +2711,7 @@
     try {
       await fetch(`/api/resources/${id}`, {
         method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessPassword }),
+        headers: { 'x-access-password': accessPassword },
       });
       allResources = allResources.filter(r => r.id !== id);
       pinnedResources = allResources.filter(r => r.is_pinned);
@@ -2745,8 +2753,8 @@
     });
     fetch('/api/goals', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ accessPassword, deviceId, data }),
+      headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
+      body: JSON.stringify({ deviceId, data }),
     }).catch(() => {});
 
     const statusEl = document.getElementById('goals-save-status');
@@ -2767,7 +2775,9 @@
         return el && el.value.trim();
       });
       if (hasLocal) return; // trust local over remote
-      const res = await fetch(`/api/goals?accessPassword=${encodeURIComponent(accessPassword)}&deviceId=${encodeURIComponent(deviceId)}`);
+      const res = await fetch(`/api/goals?deviceId=${encodeURIComponent(deviceId)}`, {
+        headers: { 'x-access-password': accessPassword },
+      });
       if (!res.ok) return;
       const remote = await res.json();
       if (!remote?.data) return;
@@ -3062,9 +3072,8 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
         body: JSON.stringify({
-          accessPassword,
           system: sanitize(systemPrompt),
           messages: conversationHistory.slice(-12).map(m => ({
             ...m,

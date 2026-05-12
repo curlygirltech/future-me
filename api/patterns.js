@@ -1,19 +1,28 @@
 import supabase from '../lib/supabase.js';
+import { isRateLimited, recordFailure, clearFailures } from '../lib/rateLimit.js';
 
-function authorized(password) {
-  return process.env.ACCESS_PASSWORD && password === process.env.ACCESS_PASSWORD;
+function getIp(req) {
+  return req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+}
+
+function authorized(req) {
+  const pw = req.headers?.['x-access-password'];
+  return !!(process.env.ACCESS_PASSWORD && pw === process.env.ACCESS_PASSWORD);
 }
 
 export function createPatternsHandler(db) {
   return async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = process.env.ALLOWED_ORIGIN || '*';
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-access-password');
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     const url = new URL(req.url, 'http://localhost');
-    const password = req.body?.accessPassword || url.searchParams.get('accessPassword');
-    if (!authorized(password)) return res.status(401).json({ error: 'Unauthorized' });
+    const ip = getIp(req);
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
+    if (!authorized(req)) { recordFailure(ip); return res.status(401).json({ error: 'Unauthorized' }); }
+    clearFailures(ip);
 
     const deviceId = req.body?.deviceId || url.searchParams.get('deviceId');
 
@@ -25,7 +34,7 @@ export function createPatternsHandler(db) {
           .select('themes, struggles, wins, current_focus, session_count, updated_at')
           .eq('device_id', deviceId)
           .single();
-        if (error && error.code !== 'PGRST116') return res.status(500).json({ error: error.message });
+        if (error && error.code !== 'PGRST116') return res.status(500).json({ error: 'Database error' });
         return res.status(200).json(data || null);
       }
 
@@ -114,8 +123,8 @@ export function createPatternsHandler(db) {
       }
 
       return res.status(405).json({ error: 'Method not allowed' });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
+    } catch {
+      return res.status(500).json({ error: 'Internal server error' });
     }
   };
 }

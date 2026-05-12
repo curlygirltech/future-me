@@ -24,8 +24,13 @@ export function makeRes() {
 
 // ── Mock request builder ─────────────────────────────────────────────────────
 
-export function makeReq(method, url, body = {}) {
-  return { method, url, body: { accessPassword: 'secret', ...body } };
+export function makeReq(method, url, body = {}, headers = {}) {
+  return {
+    method,
+    url,
+    body,
+    headers: { 'x-access-password': 'secret', ...headers },
+  };
 }
 
 // ── Supabase mock chain ──────────────────────────────────────────────────────

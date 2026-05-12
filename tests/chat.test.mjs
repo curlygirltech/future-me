@@ -13,7 +13,12 @@ function makeRes() {
 }
 
 function makeReq(overrides = {}) {
-  return { method: 'POST', body: { accessPassword: 'secret', system: 'You are a coach.', messages: [] }, ...overrides };
+  return {
+    method: 'POST',
+    headers: { 'x-access-password': 'secret' },
+    body: { system: 'You are a coach.', messages: [] },
+    ...overrides,
+  };
 }
 
 function mockFetchSuccess(status = 200, data = { id: 'msg_123', content: [] }) {
@@ -43,7 +48,7 @@ describe('CORS', () => {
     await handler(req, res);
     assert.equal(res.headers['Access-Control-Allow-Origin'], '*');
     assert.equal(res.headers['Access-Control-Allow-Methods'], 'POST, OPTIONS');
-    assert.equal(res.headers['Access-Control-Allow-Headers'], 'Content-Type');
+    assert.ok(res.headers['Access-Control-Allow-Headers'].includes('x-access-password'));
   });
 });
 
@@ -73,7 +78,7 @@ describe('Authentication', () => {
   it('returns 401 when password does not match', async () => {
     process.env.ACCESS_PASSWORD = 'correct';
     const res = makeRes();
-    await handler(makeReq({ body: { accessPassword: 'wrong', system: '', messages: [] } }), res);
+    await handler(makeReq({ headers: { 'x-access-password': 'wrong' }, body: { system: '', messages: [] } }), res);
     assert.equal(res.statusCode, 401);
     assert.equal(res.body.error, 'Unauthorized');
   });
@@ -107,7 +112,7 @@ describe('Prompt caching', () => {
     globalThis.fetch = fetchMock;
 
     const systemText = 'You are a future coach.';
-    await handler(makeReq({ body: { accessPassword: 'secret', system: systemText, messages: [] } }), makeRes());
+    await handler(makeReq({ body: { system: systemText, messages: [] } }), makeRes());
 
     const [, options] = fetchMock.mock.calls[0].arguments;
     const body = JSON.parse(options.body);
@@ -134,7 +139,7 @@ describe('Prompt caching', () => {
       { role: 'assistant', content: 'Reply' },
       { role: 'user', content: 'Second message' },
     ];
-    await handler(makeReq({ body: { accessPassword: 'secret', system: 'prompt', messages } }), makeRes());
+    await handler(makeReq({ body: { system: 'prompt', messages } }), makeRes());
 
     const [, options] = fetchMock.mock.calls[0].arguments;
     const body = JSON.parse(options.body);
@@ -158,7 +163,7 @@ describe('Prompt caching', () => {
       { role: 'user', content: 'Hello' },
       { role: 'assistant', content: 'Hi there' },
     ];
-    await handler(makeReq({ body: { accessPassword: 'secret', system: 'prompt', messages } }), makeRes());
+    await handler(makeReq({ body: { system: 'prompt', messages } }), makeRes());
 
     const [, options] = fetchMock.mock.calls[0].arguments;
     const body = JSON.parse(options.body);

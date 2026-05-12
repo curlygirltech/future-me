@@ -1,7 +1,13 @@
 import supabase from '../lib/supabase.js';
+import { isRateLimited, recordFailure, clearFailures } from '../lib/rateLimit.js';
 
-function authorized(password) {
-  return process.env.ACCESS_PASSWORD && password === process.env.ACCESS_PASSWORD;
+function getIp(req) {
+  return req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+}
+
+function authorized(req) {
+  const pw = req.headers?.['x-access-password'];
+  return !!(process.env.ACCESS_PASSWORD && pw === process.env.ACCESS_PASSWORD);
 }
 
 export function computeStreak(sessions) {
@@ -29,16 +35,19 @@ export function computeStreak(sessions) {
 
 export function createDashboardHandler(db) {
   return async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = process.env.ALLOWED_ORIGIN || '*';
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-access-password');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-    const url = new URL(req.url, 'http://localhost');
-    const password = req.body?.accessPassword || url.searchParams.get('accessPassword');
-    if (!authorized(password)) return res.status(401).json({ error: 'Unauthorized' });
+    const ip = getIp(req);
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
+    if (!authorized(req)) { recordFailure(ip); return res.status(401).json({ error: 'Unauthorized' }); }
+    clearFailures(ip);
 
+    const url = new URL(req.url, 'http://localhost');
     const deviceId = req.body?.deviceId || url.searchParams.get('deviceId');
 
     try {
@@ -57,7 +66,7 @@ export function createDashboardHandler(db) {
       ]);
 
       if (sessionsResult.error) {
-        return res.status(500).json({ error: sessionsResult.error.message });
+        return res.status(500).json({ error: 'Database error' });
       }
 
       const sessions = sessionsResult.data || [];
@@ -68,8 +77,8 @@ export function createDashboardHandler(db) {
         patterns,
         recentSessions: sessions.filter(s => s.summary).slice(0, 5),
       });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
+    } catch {
+      return res.status(500).json({ error: 'Internal server error' });
     }
   };
 }

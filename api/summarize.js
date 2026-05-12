@@ -1,18 +1,30 @@
 import supabase from '../lib/supabase.js';
+import { isRateLimited, recordFailure, clearFailures } from '../lib/rateLimit.js';
+
+function getIp(req) {
+  return req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+}
 
 export function createSummarizeHandler(db) {
   return async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const origin = process.env.ALLOWED_ORIGIN || '*';
+    res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-access-password');
     if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-    const { accessPassword, sessionId, messages, userName } = req.body;
+    const ip = getIp(req);
+    if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
 
-    if (!process.env.ACCESS_PASSWORD || accessPassword !== process.env.ACCESS_PASSWORD) {
+    const password = req.headers?.['x-access-password'];
+    if (!process.env.ACCESS_PASSWORD || password !== process.env.ACCESS_PASSWORD) {
+      recordFailure(ip);
       return res.status(401).json({ error: 'Unauthorized' });
     }
+    clearFailures(ip);
+
+    const { sessionId, messages, userName } = req.body;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'Server misconfigured' });
@@ -54,8 +66,8 @@ Be concrete and specific. Past tense. No filler phrases like "In this session".`
       }
 
       return res.status(200).json({ summary });
-    } catch (err) {
-      return res.status(500).json({ error: err.message });
+    } catch {
+      return res.status(500).json({ error: 'Internal server error' });
     }
   };
 }

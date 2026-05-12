@@ -31,7 +31,7 @@ describe('CORS', () => {
 describe('Authentication', () => {
   it('returns 401 with wrong password', async () => {
     const res = makeRes();
-    await handler(makeReq('GET', '/api/goals', { accessPassword: 'wrong' }), res);
+    await handler(makeReq('GET', '/api/goals', {}, { 'x-access-password': 'wrong' }), res);
     assert.equal(res.statusCode, 401);
   });
 
@@ -42,11 +42,11 @@ describe('Authentication', () => {
     assert.equal(res.statusCode, 401);
   });
 
-  it('accepts password from query string', async () => {
+  it('accepts password from x-access-password header', async () => {
     const db = makeMockDb({ goals: { select: { data: null, error: { code: 'PGRST116' } } } });
     handler = createGoalsHandler(db);
     const res = makeRes();
-    await handler(makeReq('GET', '/api/goals?accessPassword=secret&deviceId=dev-1', {}), res);
+    await handler(makeReq('GET', '/api/goals?deviceId=dev-1', {}, { 'x-access-password': 'secret' }), res);
     assert.equal(res.statusCode, 200);
   });
 });

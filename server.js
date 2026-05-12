@@ -41,7 +41,7 @@ function buildMockRes(res) {
 }
 
 async function dispatch(handler, req, res, body = {}) {
-  const mockReq = { method: req.method, url: req.url, body };
+  const mockReq = { method: req.method, url: req.url, body, headers: req.headers || {} };
   await handler(mockReq, buildMockRes(res));
 }
 

@@ -39,7 +39,7 @@ describe('CORS', () => {
 describe('Authentication', () => {
   it('returns 401 with wrong password', async () => {
     const res = makeRes();
-    await handler(makeReq('POST', '/api/summarize', { accessPassword: 'bad' }), res);
+    await handler(makeReq('POST', '/api/summarize', {}, { 'x-access-password': 'bad' }), res);
     assert.equal(res.statusCode, 401);
   });
 

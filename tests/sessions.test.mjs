@@ -91,6 +91,26 @@ describe('POST /api/sessions — create session', () => {
     assert.equal(call.rows.title, 'My session');
   });
 
+  it('passes category to Supabase insert when provided', async () => {
+    const db = makeMockDb({ sessions: { insert: { data: { id: 'sess-1' }, error: null } } });
+    handler = createSessionsHandler(db);
+    const res = makeRes();
+    await handler(makeReq('POST', '/api/sessions', { deviceId: 'dev-1', title: 'Chat', category: 'business' }), res);
+    const call = db.insertCalls.find(c => c.table === 'sessions');
+    assert.ok(call);
+    assert.equal(call.rows.category, 'business');
+  });
+
+  it('sets category to null when not provided', async () => {
+    const db = makeMockDb({ sessions: { insert: { data: { id: 'sess-1' }, error: null } } });
+    handler = createSessionsHandler(db);
+    const res = makeRes();
+    await handler(makeReq('POST', '/api/sessions', { deviceId: 'dev-1' }), res);
+    const call = db.insertCalls.find(c => c.table === 'sessions');
+    assert.ok(call);
+    assert.equal(call.rows.category, null);
+  });
+
   it('returns 500 when Supabase insert fails', async () => {
     const db = makeMockDb({ sessions: { insert: { data: null, error: { message: 'DB error' } } } });
     handler = createSessionsHandler(db);

@@ -28,7 +28,7 @@ export function createSessionsHandler(db) {
       if (req.method === 'POST' && parts.length === 0) {
         const { data, error } = await db
           .from('sessions')
-          .insert({ device_id: deviceId, title: req.body.title || null })
+          .insert({ device_id: deviceId, title: req.body.title || null, category: req.body.category || null })
           .select()
           .single();
         if (error) return res.status(500).json({ error: 'Database error' });

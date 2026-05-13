@@ -1434,6 +1434,219 @@
     }
 
     .rf-actions { display: flex; gap: 10px; margin-top: 4px; }
+
+    /* ── MOBILE IMPROVEMENTS ─────────────────────────────── */
+    input, textarea, select { font-size: 16px; } /* prevent iOS zoom */
+
+    .icon-btn { width: 44px; height: 44px; } /* HIG minimum touch target */
+
+    .input-area {
+      padding-bottom: max(20px, calc(env(safe-area-inset-bottom) + 14px));
+    }
+
+    @media (max-width: 400px) {
+      .row-2, .milestones-grid { grid-template-columns: 1fr; }
+      .setup-header h1 { font-size: clamp(28px, 8vw, 38px); }
+    }
+
+    /* ── SYNC CODE SCREEN ─────────────────────────────────── */
+    #sync-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 998;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 24px;
+    }
+
+    .sync-box { text-align: center; max-width: 400px; width: 100%; }
+
+    .sync-code-display {
+      font-family: 'DM Serif Display', serif;
+      font-size: 28px;
+      letter-spacing: 4px;
+      color: var(--accent);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 24px;
+      margin: 24px 0 12px;
+    }
+
+    .sync-mode-toggle {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 8px 0;
+      display: block;
+      margin: 0 auto;
+    }
+    .sync-mode-toggle:hover { color: var(--accent); }
+
+    /* ── HOME SCREEN ──────────────────────────────────────── */
+    #home-screen {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      max-width: 720px;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .home-header {
+      padding: 52px 24px 12px;
+      text-align: center;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .home-eyebrow {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .home-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 30px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #F7CACD 0%, #E36497 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+
+    .home-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .carousel-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 0;
+      padding: 20px 0 0;
+    }
+
+    .carousel-track {
+      display: flex;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding: 16px 12vw 16px;
+      gap: 16px;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+
+    .area-card {
+      scroll-snap-align: center;
+      flex: 0 0 75vw;
+      max-width: 290px;
+      min-height: 360px;
+      border-radius: 28px;
+      padding: 36px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s;
+      border: 1px solid rgba(255,255,255,0.08);
+      position: relative;
+      overflow: hidden;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .area-card:active { transform: scale(0.96); }
+
+    .area-card-icon { font-size: 54px; margin-bottom: 18px; line-height: 1; }
+
+    .area-card-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 21px;
+      color: white;
+      text-align: center;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .area-card-tagline {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .area-card-cta {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 20px;
+      padding: 8px 20px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      padding: 14px 0 8px;
+      flex-shrink: 0;
+    }
+
+    .carousel-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s;
+    }
+    .carousel-dot.active { background: var(--accent); width: 18px; border-radius: 3px; }
+
+    .home-footer {
+      padding: 10px 24px max(20px, calc(env(safe-area-inset-bottom) + 10px));
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .home-footer-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+      transition: all 0.15s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      min-width: 60px;
+    }
+    .home-footer-btn:hover { background: var(--surface2); color: var(--accent); }
+    .home-footer-btn span { font-size: 18px; }
   </style>
 </head>
 <body>
@@ -1448,6 +1661,51 @@
            onkeydown="if(event.key==='Enter') submitPassword()" />
     <div id="gate-error">Incorrect password. Try again.</div>
     <button id="gate-submit" onclick="submitPassword()">Enter →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════ SYNC CODE SCREEN -->
+<div id="sync-screen">
+  <!-- Mode A: new device, generate a code -->
+  <div class="sync-box" id="sync-new">
+    <div class="gate-icon">🔐</div>
+    <h2 style="font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:10px;background:linear-gradient(135deg,#F7CACD,#E36497);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Your Sync Code</h2>
+    <p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:0">This links your data across devices. Screenshot it or write it down — you'll need it on other devices.</p>
+    <div class="sync-code-display" id="sync-code-value"></div>
+    <button class="btn btn-primary" onclick="confirmSyncCode()" style="width:100%;margin-bottom:14px">I've saved my code →</button>
+    <button class="sync-mode-toggle" onclick="showSyncEntry()">Already have a code from another device?</button>
+  </div>
+  <!-- Mode B: enter an existing code -->
+  <div class="sync-box" id="sync-entry" style="display:none">
+    <div class="gate-icon">🔑</div>
+    <h2 style="font-family:'DM Serif Display',serif;font-size:26px;margin-bottom:10px;background:linear-gradient(135deg,#F7CACD,#E36497);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Enter Your Code</h2>
+    <p style="color:var(--text-muted);font-size:14px;line-height:1.6;margin-bottom:20px">Enter your existing sync code to access your data on this device.</p>
+    <input type="text" id="sync-entry-input" placeholder="WORD-WORD-0000"
+           style="text-align:center;letter-spacing:2px;margin-bottom:10px"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')submitSyncCode()" />
+    <div id="sync-entry-error" style="color:var(--error-text);font-size:13px;margin-bottom:10px;display:none">Code not recognized. Check spelling and try again.</div>
+    <button class="btn btn-primary" onclick="submitSyncCode()" style="width:100%;margin-bottom:14px">Use this code →</button>
+    <button class="sync-mode-toggle" onclick="showSyncNew()">← Generate a new code instead</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ HOME SCREEN -->
+<div id="home-screen">
+  <div class="home-header">
+    <div class="home-eyebrow">✦ Future Me</div>
+    <div class="home-title" id="home-greeting-text">What are we working on?</div>
+    <div class="home-sub">Choose a life area to talk with your coach</div>
+  </div>
+  <div class="carousel-container">
+    <div class="carousel-track" id="carousel-track"></div>
+    <div class="carousel-dots" id="carousel-dots"></div>
+  </div>
+  <div class="home-footer">
+    <button class="home-footer-btn" onclick="openGoalsPanelFromHome()"><span>⚙️</span>Profile</button>
+    <button class="home-footer-btn" onclick="openHistory()"><span>🕐</span>History</button>
+    <button class="home-footer-btn" onclick="showSyncCodeModal()"><span>🔗</span>Sync Code</button>
+    <button class="home-footer-btn" onclick="toggleTheme()"><span id="home-theme-icon">🌙</span>Theme</button>
   </div>
 </div>
 
@@ -1581,7 +1839,7 @@
     <div class="avatar" id="chat-avatar">✦</div>
     <div class="chat-header-info">
       <div class="chat-header-name" id="chat-name">Future Me</div>
-      <div class="chat-header-sub">● Ready to coach you</div>
+      <div class="chat-header-sub" id="chat-sub">● Ready to coach you</div>
     </div>
     <div class="header-actions">
       <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
@@ -1809,7 +2067,7 @@
   let supabaseSessionId = null;
   let deviceId = null;
   let historyCache = [];
-  let pendingAttachment = null; // { type: 'image'|'pdf'|'link', data, mediaType, name, preview }
+  let pendingAttachment = null;
   let recentSummaries = [];
   let currentPatterns = null;
   let pinnedResources = [];
@@ -1821,6 +2079,37 @@
   let currentViewedMessages = [];
   let currentViewedId = null;
   let currentViewedSource = null;
+  let currentArea = null;
+  let pendingSyncResolve = null;
+  let pendingSyncCode = null;
+
+  const LIFE_AREAS = [
+    { id: 'business',      label: 'Business & Career',      icon: '💼', bg: 'linear-gradient(145deg,#1a1a2e,#2d1b69)', tagline: 'Strategy, growth & income' },
+    { id: 'physical',      label: 'Physical Health',         icon: '💪', bg: 'linear-gradient(145deg,#0d2818,#1a4a2e)', tagline: 'Energy, fitness & wellness' },
+    { id: 'mental',        label: 'Mental Health',           icon: '🧠', bg: 'linear-gradient(145deg,#1a0d2e,#2d1654)', tagline: 'Mindset, peace & resilience' },
+    { id: 'spiritual',     label: 'Spiritual Health',        icon: '✨', bg: 'linear-gradient(145deg,#1a1200,#3d2a00)', tagline: 'Purpose, meaning & alignment' },
+    { id: 'relationships', label: 'Relationships',           icon: '❤️', bg: 'linear-gradient(145deg,#1a0d0d,#3d1a1a)', tagline: 'Love, family & deep connection' },
+    { id: 'hobbies',       label: 'Hobbies & Creativity',   icon: '🎨', bg: 'linear-gradient(145deg,#0d1a1a,#1a3a3a)', tagline: 'Joy, expression & play' },
+    { id: 'networking',    label: 'Networking & Community',  icon: '🤝', bg: 'linear-gradient(145deg,#0d1800,#1e3a00)', tagline: 'Your people & your impact' },
+  ];
+
+  const AREA_PERSONAS = {
+    business:      'CURRENT COACHING FOCUS — Business & Career: Think in terms of strategy, income, entrepreneurship, productivity, and building something sustainable. Be concrete about numbers, timelines, and next moves.',
+    physical:      'CURRENT COACHING FOCUS — Physical Health: Help with fitness, nutrition, energy, sleep, and body wellness. Ground advice in sustainable habits, not extremes.',
+    mental:        'CURRENT COACHING FOCUS — Mental Health: Hold space for emotional processing, mindset work, anxiety, burnout, and psychological resilience. Lead with empathy — check in before offering solutions.',
+    spiritual:     'CURRENT COACHING FOCUS — Spiritual Health: Explore meaning, purpose, values alignment, meditation, and connection to something larger than the daily grind.',
+    relationships: 'CURRENT COACHING FOCUS — Relationships: Help with romantic partnerships, family dynamics, friendships, communication patterns, and the courage to set and hold boundaries.',
+    hobbies:       'CURRENT COACHING FOCUS — Hobbies & Creativity: Champion creative expression, protecting time for joy, overcoming creative blocks, and nurturing the playful part of life.',
+    networking:    'CURRENT COACHING FOCUS — Networking & Community: Help with building genuine connections, showing up for others, finding your people, and creating community impact.',
+  };
+
+  const SYNC_WORDS = [
+    'APEX','BOLD','CALM','DUSK','ECHO','FLOW','GLOW','HALO',
+    'JADE','KEEN','LUSH','MIND','NOVA','PEAK','PURE','RISE',
+    'SAGE','SOUL','TRUE','VIBE','WAVE','WISE','ZEAL','DAWN',
+    'REEF','TIDE','ARCH','MIST','BLOOM','CREST','EMBER','FERN',
+    'GROVE','HAVEN','JAZZ','LORE','MESH','NEST','OAK','PRISM',
+  ];
 
   const FIELDS = ['name','goal','timeline','coach-name','why',
                   'current-situation','past-wins','strengths','challenges',
@@ -1855,38 +2144,36 @@
     setTimeout(() => document.getElementById('gate-password').focus(), 50);
   }
 
-  function submitPassword() {
+  async function submitPassword() {
     const val = document.getElementById('gate-password').value.trim();
     if (!val) return;
     accessPassword = val;
     localStorage.setItem('futureMePassword', val);
     document.getElementById('password-gate').style.display = 'none';
+    await initDeviceId();
     initApp();
   }
 
   // ── APP INIT ────────────────────────────────────────────────
 
   function initApp() {
-    deviceId = getDeviceId();
     loadSetup();
     FIELDS.forEach(id => {
       const el = document.getElementById(id);
       if (el) el.addEventListener('input', saveSetup);
       if (el) el.addEventListener('change', saveSetup);
     });
-    syncGoalsFromSupabase(); // background — applies only if localStorage is empty
+    syncGoalsFromSupabase();
     if (restoreActiveConversation()) return;
-    try {
-      const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
-      if (saved['name'] && saved['goal']) launch();
-    } catch(e) {}
+    showHomeScreen();
   }
 
-  window.addEventListener('load', () => {
+  window.addEventListener('load', async () => {
     initTheme();
     if (!accessPassword) {
       showPasswordGate(false);
     } else {
+      await initDeviceId();
       initApp();
     }
   });
@@ -2059,7 +2346,8 @@
         conversationHistory: stripBinaryContent(conversationHistory),
         userName,
         coachName,
-        systemPrompt
+        systemPrompt,
+        currentArea,
       }));
     } catch(e) {}
   }
@@ -2077,10 +2365,14 @@
       userName = data.userName;
       coachName = data.coachName;
       systemPrompt = data.systemPrompt;
+      currentArea = data.currentArea || null;
 
       document.getElementById('chat-name').textContent = coachName;
       document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
+      document.getElementById('chat-sub').textContent = currentArea ? `● ${getLabelForArea(currentArea)}` : '● Ready to coach you';
       document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('setup-theme-btn').style.display = 'none';
+      document.getElementById('home-screen').style.display = 'none';
       document.getElementById('chat-screen').style.display = 'flex';
 
       const area = document.getElementById('messages');
@@ -2156,8 +2448,10 @@
 
   function closeHistory() {
     showingArchived = false;
+    historyCategory = null;
     closeAllHistoryMenus();
     document.getElementById('history-panel').style.display = 'none';
+    if (document.getElementById('chat-screen').style.display === 'none') showHomeScreen();
   }
 
   async function renderHistory() {
@@ -2241,7 +2535,7 @@
         <div class="history-item-meta">
           <span>${s.dateStr}</span>
           <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
-          ${s.category ? `<span class="history-item-category">${escapeHtml(s.category)}</span>` : ''}
+          ${s.category ? `<span class="history-item-category">${escapeHtml(getLabelForArea(s.category))}</span>` : ''}
         </div>
         ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
       </div>`;
@@ -2419,7 +2713,7 @@
     const cats = [...new Set(historyCache.map(s => s.category).filter(Boolean))].sort();
     if (cats.length === 0) { bar.innerHTML = ''; return; }
     bar.innerHTML = cats.map(c =>
-      `<button class="cat-chip${c === historyCategory ? ' active' : ''}" onclick="setHistoryCategory(this.dataset.cat)" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`
+      `<button class="cat-chip${c === historyCategory ? ' active' : ''}" onclick="setHistoryCategory(this.dataset.cat)" data-cat="${escapeHtml(c)}">${escapeHtml(getLabelForArea(c))}</button>`
     ).join('');
   }
 
@@ -2450,7 +2744,7 @@
         <div class="history-item-meta">
           <span>${s.dateStr}</span>
           <span>${s.messageCount} exchange${s.messageCount !== 1 ? 's' : ''}</span>
-          ${s.category ? `<span class="history-item-category">${escapeHtml(s.category)}</span>` : ''}
+          ${s.category ? `<span class="history-item-category">${escapeHtml(getLabelForArea(s.category))}</span>` : ''}
         </div>
         ${s.summary ? `<div class="history-item-summary">${escapeHtml(s.summary)}</div>` : ''}
       </div>`;
@@ -2505,6 +2799,10 @@
     const id = currentViewedId;
     const source = currentViewedSource;
 
+    // Restore the area from the session being resumed
+    const session = historyCache.find(s => String(s.id) === String(id));
+    currentArea = session?.category || null;
+
     saveCurrentSession();
     saveToHistory();
     clearActiveConversation();
@@ -2523,6 +2821,9 @@
     ]);
     systemPrompt = buildSystemPrompt();
 
+    document.getElementById('chat-sub').textContent = currentArea ? `● ${getLabelForArea(currentArea)}` : '● Ready to coach you';
+    document.getElementById('chat-screen').style.display = 'flex';
+
     document.getElementById('messages').innerHTML = '';
     conversationHistory
       .filter(m => !m.content.startsWith('Hello! Introduce yourself'))
@@ -2533,19 +2834,161 @@
 
     const msgs = document.getElementById('messages');
     msgs.scrollTop = msgs.scrollHeight;
-    document.getElementById('user-input').focus();
+    document.getElementById('chat-input').focus();
   }
 
   function escapeHtml(str) {
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
   }
 
-  // ── DEVICE ID ───────────────────────────────────────────────
+  // ── SYNC CODE / DEVICE ID ───────────────────────────────────
 
-  function getDeviceId() {
-    let id = localStorage.getItem('futureMeDeviceId');
-    if (!id) { id = crypto.randomUUID(); localStorage.setItem('futureMeDeviceId', id); }
-    return id;
+  function generateSyncCode() {
+    const w1 = SYNC_WORDS[Math.floor(Math.random() * SYNC_WORDS.length)];
+    const w2 = SYNC_WORDS[Math.floor(Math.random() * SYNC_WORDS.length)];
+    const num = String(Math.floor(Math.random() * 9000) + 1000);
+    return `${w1}-${w2}-${num}`;
+  }
+
+  function initDeviceId() {
+    return new Promise((resolve) => {
+      const existing = localStorage.getItem('futureMeDeviceId');
+      if (existing) { deviceId = existing; resolve(); return; }
+      pendingSyncResolve = resolve;
+      pendingSyncCode = generateSyncCode();
+      document.getElementById('sync-code-value').textContent = pendingSyncCode;
+      document.getElementById('sync-new').style.display = 'block';
+      document.getElementById('sync-entry').style.display = 'none';
+      document.getElementById('sync-screen').style.display = 'flex';
+    });
+  }
+
+  function confirmSyncCode() {
+    localStorage.setItem('futureMeDeviceId', pendingSyncCode);
+    deviceId = pendingSyncCode;
+    document.getElementById('sync-screen').style.display = 'none';
+    if (pendingSyncResolve) { pendingSyncResolve(); pendingSyncResolve = null; }
+  }
+
+  function showSyncEntry() {
+    document.getElementById('sync-new').style.display = 'none';
+    document.getElementById('sync-entry').style.display = 'block';
+    document.getElementById('sync-entry-input').value = '';
+    document.getElementById('sync-entry-error').style.display = 'none';
+    setTimeout(() => document.getElementById('sync-entry-input').focus(), 50);
+  }
+
+  function showSyncNew() {
+    document.getElementById('sync-entry').style.display = 'none';
+    document.getElementById('sync-new').style.display = 'block';
+  }
+
+  function submitSyncCode() {
+    const val = document.getElementById('sync-entry-input').value.trim().toUpperCase();
+    if (val.length < 5 || !val.includes('-')) {
+      document.getElementById('sync-entry-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('sync-entry-error').style.display = 'none';
+    localStorage.setItem('futureMeDeviceId', val);
+    deviceId = val;
+    document.getElementById('sync-screen').style.display = 'none';
+    if (pendingSyncResolve) { pendingSyncResolve(); pendingSyncResolve = null; }
+  }
+
+  function showSyncCodeModal() {
+    const code = localStorage.getItem('futureMeDeviceId') || 'Not set';
+    alert(`Your sync code:\n\n${code}\n\nEnter this on any other device to access your data.`);
+  }
+
+  // ── HOME SCREEN ─────────────────────────────────────────────
+
+  function getLabelForArea(id) {
+    const area = LIFE_AREAS.find(a => a.id === id);
+    return area ? area.label : id;
+  }
+
+  function renderHomeScreen() {
+    const track = document.getElementById('carousel-track');
+    const dots  = document.getElementById('carousel-dots');
+
+    track.innerHTML = LIFE_AREAS.map((area, i) => `
+      <div class="area-card" style="background:${area.bg}" onclick="selectArea('${area.id}')" data-index="${i}">
+        <div class="area-card-icon">${area.icon}</div>
+        <div class="area-card-name">${area.label}</div>
+        <div class="area-card-tagline">${area.tagline}</div>
+        <div class="area-card-cta">Start a session →</div>
+      </div>`).join('');
+
+    dots.innerHTML = LIFE_AREAS.map((_, i) =>
+      `<div class="carousel-dot${i === 0 ? ' active' : ''}" id="cdot-${i}"></div>`
+    ).join('');
+
+    let scrollTimer;
+    track.addEventListener('scroll', () => {
+      clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(updateCarouselDots, 60);
+    });
+  }
+
+  function updateCarouselDots() {
+    const track = document.getElementById('carousel-track');
+    if (!track) return;
+    const center = track.getBoundingClientRect().left + track.getBoundingClientRect().width / 2;
+    let closest = 0, minDist = Infinity;
+    track.querySelectorAll('.area-card').forEach((card, i) => {
+      const dist = Math.abs(card.getBoundingClientRect().left + card.getBoundingClientRect().width / 2 - center);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    document.querySelectorAll('.carousel-dot').forEach((dot, i) => dot.classList.toggle('active', i === closest));
+  }
+
+  function showHomeScreen() {
+    const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
+    const name = saved['name'] || '';
+    const greetingEl = document.getElementById('home-greeting-text');
+    if (name) {
+      const h = new Date().getHours();
+      const g = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+      greetingEl.textContent = `${g}, ${name} ✦`;
+    } else {
+      greetingEl.textContent = 'What are we working on?';
+    }
+
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('setup-theme-btn').style.display = 'none';
+    document.getElementById('chat-screen').style.display = 'none';
+    document.getElementById('home-screen').style.display = 'flex';
+
+    // Sync theme icon in home footer
+    const theme = document.documentElement.getAttribute('data-theme');
+    const homeIcon = document.getElementById('home-theme-icon');
+    if (homeIcon) homeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
+
+    renderHomeScreen();
+  }
+
+  function selectArea(areaId) {
+    currentArea = areaId;
+    localStorage.setItem('futureMeLastArea', areaId);
+    const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
+    document.getElementById('home-screen').style.display = 'none';
+    if (saved['name'] && saved['goal']) {
+      launch();
+    } else {
+      document.getElementById('setup-theme-btn').style.display = 'flex';
+      document.getElementById('setup-screen').style.display = 'block';
+    }
+  }
+
+  function openGoalsPanelFromHome() {
+    Object.entries(GOALS_MAP).forEach(([gId, setupId]) => {
+      const src = document.getElementById(setupId);
+      const dst = document.getElementById(gId);
+      if (src && dst) dst.value = src.value;
+    });
+    document.getElementById('goals-save-status').textContent = '';
+    document.getElementById('goals-panel').style.display = 'flex';
   }
 
   // ── SUPABASE SYNC ────────────────────────────────────────────
@@ -2555,7 +2998,7 @@
       const res = await fetch('/api/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-access-password': accessPassword },
-        body: JSON.stringify({ deviceId }),
+        body: JSON.stringify({ deviceId, category: currentArea }),
       });
       if (!res.ok) return null;
       const data = await res.json();
@@ -2934,6 +3377,7 @@
 
   function closeGoalsPanel() {
     document.getElementById('goals-panel').style.display = 'none';
+    if (document.getElementById('chat-screen').style.display === 'none') showHomeScreen();
   }
 
   function saveGoalsPanel() {
@@ -3017,7 +3461,9 @@
       milestones += `\nWhen ${userName} asks "am I on track?" or "what phase am I in?", figure out today's approximate quarter and compare their progress to these milestones.`;
     }
 
-    return `You are ${coachName} — the version of ${userName} who has already achieved: ${goal}. You're speaking to ${userName} from ${timeline} in the future, looking back.
+    const areaBlurb = AREA_PERSONAS[currentArea] ? `\n\n${AREA_PERSONAS[currentArea]}` : '';
+
+    return `You are ${coachName} — the version of ${userName} who has already achieved: ${goal}. You're speaking to ${userName} from ${timeline} in the future, looking back.${areaBlurb}
 
 ABOUT ${userName.toUpperCase()}:
 - Current situation: ${situation || 'Not specified'}
@@ -3091,7 +3537,10 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
     document.getElementById('chat-name').textContent = coachName;
     document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
+    document.getElementById('chat-sub').textContent = `● ${getLabelForArea(currentArea)}`;
     document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('setup-theme-btn').style.display = 'none';
+    document.getElementById('home-screen').style.display = 'none';
     document.getElementById('chat-screen').style.display = 'flex';
 
     supabaseSessionId = await createSupabaseSession();
@@ -3414,16 +3863,11 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     saveToHistory();
     clearActiveConversation();
     conversationHistory = [];
-    currentSessionId = Date.now();
+    currentSessionId = null;
+    currentArea = null;
     document.getElementById('messages').innerHTML = '';
-    [recentSummaries] = await Promise.all([
-      fetchRecentSummaries(),
-      fetchCurrentPatterns(),
-      fetchPinnedResources(),
-    ]);
-    systemPrompt = buildSystemPrompt();
-    supabaseSessionId = await createSupabaseSession();
-    sendOpeningMessage();
+    document.getElementById('chat-screen').style.display = 'none';
+    showHomeScreen();
   }
 
   function resetToSetup() {

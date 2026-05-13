@@ -1,8 +1,5 @@
 import { isRateLimited, recordFailure, clearFailures } from '../lib/rateLimit.js';
-
-function getIp(req) {
-  return req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
+import { getIp } from '../lib/auth.js';
 
 export default async function handler(req, res) {
   const origin = process.env.ALLOWED_ORIGIN || '*';

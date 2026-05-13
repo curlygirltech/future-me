@@ -1,14 +1,6 @@
 import supabase from '../lib/supabase.js';
 import { isRateLimited, recordFailure, clearFailures } from '../lib/rateLimit.js';
-
-function getIp(req) {
-  return req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
-
-function authorized(req) {
-  const pw = req.headers?.['x-access-password'];
-  return !!(process.env.ACCESS_PASSWORD && pw === process.env.ACCESS_PASSWORD);
-}
+import { getIp, authorized } from '../lib/auth.js';
 
 export function computeStreak(sessions) {
   const days = [...new Set(

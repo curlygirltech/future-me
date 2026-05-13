@@ -1,16 +1,8 @@
 import { describe, it, before, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
+import { makeRes } from './helpers.mjs';
 
 // ── helpers ──────────────────────────────────────────────────────────────────
-
-function makeRes() {
-  const res = { headers: {}, statusCode: null, body: null };
-  res.setHeader = (k, v) => { res.headers[k] = v; };
-  res.status = (code) => { res.statusCode = code; return res; };
-  res.json = (data) => { res.body = data; return res; };
-  res.end = () => res;
-  return res;
-}
 
 function makeReq(overrides = {}) {
   return {

@@ -1,9 +1,6 @@
 import supabase from '../lib/supabase.js';
 import { isRateLimited, recordFailure, clearFailures } from '../lib/rateLimit.js';
-
-function getIp(req) {
-  return req.headers?.['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-}
+import { getIp } from '../lib/auth.js';
 
 export function createSummarizeHandler(db) {
   return async function handler(req, res) {

@@ -1490,6 +1490,140 @@
     }
     .sync-mode-toggle:hover { color: var(--accent); }
 
+    /* ── HAMBURGER BUTTON ─────────────────────────────────── */
+    .hamburger-btn {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+    .hamburger-btn:hover { background: var(--border); }
+
+    /* ── NAV DRAWER ───────────────────────────────────────── */
+    #drawer-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 500;
+      backdrop-filter: blur(2px);
+    }
+    #drawer-overlay.open { display: block; }
+
+    #nav-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      max-width: 85vw;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      z-index: 501;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+    }
+    #nav-drawer.open { transform: translateX(0); }
+
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 52px 16px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .drawer-wordmark {
+      font-family: 'DM Serif Display', serif;
+      font-size: 22px;
+      background: linear-gradient(135deg, #F7CACD 0%, #E36497 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      flex: 1;
+      text-align: left;
+      cursor: pointer;
+      background-color: transparent;
+      border: none;
+      padding: 0;
+    }
+
+    .drawer-close {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0 max(24px, env(safe-area-inset-bottom));
+    }
+    .drawer-body::-webkit-scrollbar { width: 3px; }
+    .drawer-body::-webkit-scrollbar-track { background: transparent; }
+    .drawer-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .drawer-section {
+      padding: 16px 20px 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .drawer-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 11px 20px;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--accent); }
+
+    .nav-item-icon {
+      font-size: 17px;
+      width: 22px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
     /* ── HOME SCREEN ──────────────────────────────────────── */
     #home-screen {
       display: none;
@@ -1500,156 +1634,155 @@
       overflow: hidden;
     }
 
-    .home-header {
-      padding: 52px 24px 12px;
-      text-align: center;
-      flex-shrink: 0;
+    .home-topbar {
+      padding: 52px 16px 16px;
       display: flex;
-      flex-direction: column;
       align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
 
-    .home-eyebrow {
-      font-size: 12px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
-
-    .home-title {
+    .home-wordmark-btn {
+      flex: 1;
+      text-align: left;
       font-family: 'DM Serif Display', serif;
-      font-size: 30px;
+      font-size: 22px;
+      background: linear-gradient(135deg, #F7CACD 0%, #E36497 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      border: none;
+      cursor: default;
+      padding: 0;
+    }
+
+    .home-greeting-area {
+      padding: 20px 20px 0;
+      flex-shrink: 0;
+    }
+
+    .home-greeting {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
       line-height: 1.2;
       background: linear-gradient(135deg, #F7CACD 0%, #E36497 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .home-sub {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--text-muted);
     }
 
-    .carousel-container {
+    .areas-scroll {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      min-height: 0;
-      padding: 20px 0 0;
+      overflow-y: auto;
+      padding: 0 16px 8px;
+    }
+    .areas-scroll::-webkit-scrollbar { width: 4px; }
+    .areas-scroll::-webkit-scrollbar-track { background: transparent; }
+    .areas-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .areas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 16px 0;
     }
 
-    .carousel-track {
-      display: flex;
-      overflow-x: scroll;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-      padding: 16px 12vw 16px;
-      gap: 16px;
-    }
-    .carousel-track::-webkit-scrollbar { display: none; }
-
-    .area-card {
-      scroll-snap-align: center;
-      flex: 0 0 75vw;
-      max-width: 290px;
-      min-height: 360px;
-      border-radius: 28px;
-      padding: 36px 24px 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+    .area-grid-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px 14px 14px;
       cursor: pointer;
-      transition: transform 0.18s, box-shadow 0.18s;
-      border: 1px solid rgba(255,255,255,0.08);
-      position: relative;
-      overflow: hidden;
+      transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      min-height: 130px;
       -webkit-user-select: none;
       user-select: none;
     }
+    .area-grid-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(227,100,151,0.15);
+    }
+    .area-grid-card:active { transform: scale(0.97); }
 
-    .area-card:active { transform: scale(0.96); }
+    .area-grid-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
 
-    .area-card-icon { font-size: 54px; margin-bottom: 18px; line-height: 1; }
+    .area-grid-icon {
+      font-size: 24px;
+      line-height: 1;
+      margin: 2px 0;
+    }
 
-    .area-card-name {
+    .area-grid-name {
       font-family: 'DM Serif Display', serif;
-      font-size: 21px;
-      color: white;
-      text-align: center;
-      margin-bottom: 8px;
+      font-size: 15px;
+      color: var(--text);
       line-height: 1.2;
     }
 
-    .area-card-tagline {
-      font-size: 13px;
-      color: rgba(255,255,255,0.6);
-      text-align: center;
-      line-height: 1.5;
-      margin-bottom: 24px;
+    .area-grid-tagline {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
 
-    .area-card-cta {
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.85);
-      border: 1px solid rgba(255,255,255,0.25);
-      border-radius: 20px;
-      padding: 8px 20px;
-    }
-
-    .carousel-dots {
+    .home-chips {
+      padding: 12px 16px max(16px, calc(env(safe-area-inset-bottom) + 12px));
       display: flex;
-      justify-content: center;
-      gap: 6px;
-      padding: 14px 0 8px;
-      flex-shrink: 0;
-    }
-
-    .carousel-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: all 0.3s;
-    }
-    .carousel-dot.active { background: var(--accent); width: 18px; border-radius: 3px; }
-
-    .home-footer {
-      padding: 10px 24px max(20px, calc(env(safe-area-inset-bottom) + 10px));
-      display: flex;
-      justify-content: center;
       gap: 8px;
+      flex-wrap: wrap;
       flex-shrink: 0;
       border-top: 1px solid var(--border);
       background: var(--surface);
     }
-
-    .home-footer-btn {
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      cursor: pointer;
-      padding: 8px 12px;
-      border-radius: 8px;
-      transition: all 0.15s;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      min-width: 60px;
-    }
-    .home-footer-btn:hover { background: var(--surface2); color: var(--accent); }
-    .home-footer-btn span { font-size: 18px; }
   </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════ NAV DRAWER -->
+<div id="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="nav-drawer">
+  <div class="drawer-header">
+    <button class="drawer-wordmark" onclick="goHome()">Future Me</button>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">Life Areas</div>
+    <button class="nav-item" onclick="selectAreaFromDrawer('business')"><span class="nav-item-icon">💼</span>Business &amp; Career</button>
+    <button class="nav-item" onclick="selectAreaFromDrawer('physical')"><span class="nav-item-icon">💪</span>Physical Health</button>
+    <button class="nav-item" onclick="selectAreaFromDrawer('mental')"><span class="nav-item-icon">🧠</span>Mental Health</button>
+    <button class="nav-item" onclick="selectAreaFromDrawer('spiritual')"><span class="nav-item-icon">✨</span>Spiritual Health</button>
+    <button class="nav-item" onclick="selectAreaFromDrawer('relationships')"><span class="nav-item-icon">❤️</span>Relationships</button>
+    <button class="nav-item" onclick="selectAreaFromDrawer('hobbies')"><span class="nav-item-icon">🎨</span>Hobbies &amp; Creativity</button>
+    <button class="nav-item" onclick="selectAreaFromDrawer('networking')"><span class="nav-item-icon">🤝</span>Networking &amp; Community</button>
+    <div class="drawer-divider"></div>
+    <div class="drawer-section">Navigate</div>
+    <button class="nav-item" onclick="closeDrawer();openHistory()"><span class="nav-item-icon">🕐</span>History</button>
+    <button class="nav-item" onclick="closeDrawer();openProgressPanel()"><span class="nav-item-icon">📊</span>Progress</button>
+    <button class="nav-item" onclick="closeDrawer();openResourcesPanel()"><span class="nav-item-icon">📚</span>Resources</button>
+    <button class="nav-item" onclick="closeDrawer();openGoalsPanelFromNav()"><span class="nav-item-icon">⚙️</span>Profile &amp; Goals</button>
+    <div class="drawer-divider"></div>
+    <button class="nav-item" onclick="closeDrawer();showSyncCodeModal()"><span class="nav-item-icon">🔗</span>My Sync Code</button>
+    <button class="nav-item" onclick="toggleThemeFromDrawer()"><span class="nav-item-icon" id="drawer-theme-icon">🌙</span><span id="drawer-theme-label">Dark Mode</span></button>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════ PASSWORD GATE -->
 <div id="password-gate">
@@ -1692,20 +1825,22 @@
 
 <!-- ═══════════════════════════════════════════════ HOME SCREEN -->
 <div id="home-screen">
-  <div class="home-header">
-    <div class="home-eyebrow">✦ Future Me</div>
-    <div class="home-title" id="home-greeting-text">What are we working on?</div>
+  <div class="home-topbar">
+    <button class="hamburger-btn" onclick="openDrawer()">☰</button>
+    <div class="home-wordmark-btn">Future Me</div>
+  </div>
+  <div class="home-greeting-area">
+    <div class="home-greeting" id="home-greeting-text">What are we working on?</div>
     <div class="home-sub">Choose a life area to talk with your coach</div>
   </div>
-  <div class="carousel-container">
-    <div class="carousel-track" id="carousel-track"></div>
-    <div class="carousel-dots" id="carousel-dots"></div>
+  <div class="areas-scroll">
+    <div class="areas-grid" id="areas-grid"></div>
   </div>
-  <div class="home-footer">
-    <button class="home-footer-btn" onclick="openGoalsPanelFromHome()"><span>⚙️</span>Profile</button>
-    <button class="home-footer-btn" onclick="openHistory()"><span>🕐</span>History</button>
-    <button class="home-footer-btn" onclick="showSyncCodeModal()"><span>🔗</span>Sync Code</button>
-    <button class="home-footer-btn" onclick="toggleTheme()"><span id="home-theme-icon">🌙</span>Theme</button>
+  <div class="home-chips">
+    <button class="quick-btn" onclick="startFromHome('What should I focus on today?')">Focus for today</button>
+    <button class="quick-btn" onclick="startFromHome('Am I on track for my goal?')">Check in</button>
+    <button class="quick-btn" onclick="startFromHome('I need some motivation right now.')">Motivation</button>
+    <button class="quick-btn" onclick="startFromHome('I\'m feeling stuck. What\'s one thing I can do in the next 30 minutes?')">Feeling stuck</button>
   </div>
 </div>
 
@@ -1836,17 +1971,11 @@
 <!-- ═══════════════════════════════════════════════ CHAT SCREEN -->
 <div id="chat-screen">
   <div class="chat-header">
+    <button class="hamburger-btn" onclick="openDrawer()">☰</button>
     <div class="avatar" id="chat-avatar">✦</div>
     <div class="chat-header-info">
       <div class="chat-header-name" id="chat-name">Future Me</div>
       <div class="chat-header-sub" id="chat-sub">● Ready to coach you</div>
-    </div>
-    <div class="header-actions">
-      <button class="icon-btn" onclick="openHistory()" title="Chat history">🕐</button>
-      <button class="icon-btn" onclick="openProgressPanel()" title="Progress">📊</button>
-      <button class="icon-btn" onclick="openResourcesPanel()" title="Resources">📚</button>
-      <button class="icon-btn" onclick="newChat()" title="New chat" style="font-size:14px;font-weight:700;">＋</button>
-      <button class="icon-btn" onclick="openGoalsPanel()" title="Edit goals">⚙️</button>
     </div>
   </div>
 
@@ -1854,11 +1983,11 @@
   <div id="error-area"></div>
 
   <div class="quick-actions" id="quick-actions">
-    <button class="quick-btn" onclick="quickSend('What should I focus on today?')">🎯 What should I focus on today?</button>
-    <button class="quick-btn" onclick="quickSend('Am I on track for my goal?')">📊 Am I on track?</button>
-    <button class="quick-btn" onclick="quickSend('I need some motivation right now.')">⚡ I need motivation</button>
-    <button class="quick-btn" onclick="quickSend('Paint me a picture of my future day once I\'ve reached my goal.')">🌅 Show me my future day</button>
-    <button class="quick-btn" onclick="quickSend('I\'m feeling stuck. What\'s one thing I can do in the next 30 minutes?')">⏱ I'm feeling stuck</button>
+    <button class="quick-btn" onclick="quickSend('What should I focus on today?')">Focus for today</button>
+    <button class="quick-btn" onclick="quickSend('Am I on track for my goal?')">Am I on track?</button>
+    <button class="quick-btn" onclick="quickSend('I need some motivation right now.')">I need motivation</button>
+    <button class="quick-btn" onclick="quickSend('Paint me a picture of my future day once I\'ve reached my goal.')">Show me my future day</button>
+    <button class="quick-btn" onclick="quickSend('I\'m feeling stuck. What\'s one thing I can do in the next 30 minutes?')">I\'m feeling stuck</button>
   </div>
 
   <div id="attachment-preview"></div>
@@ -1882,9 +2011,9 @@
 <!-- ═══════════════════════════════════════════════ HISTORY PANEL -->
 <div id="history-panel">
   <div class="history-header">
-    <button class="history-back-btn" onclick="closeHistory()">← Back to Chat</button>
+    <button class="history-back-btn" onclick="closeHistory()">← Back</button>
     <div class="history-title">Chat History</div>
-    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="hamburger-btn" onclick="openDrawer()">☰</button>
   </div>
   <div id="category-filter-bar" class="category-filter-bar"></div>
   <div class="history-body" id="history-body"></div>
@@ -1909,9 +2038,9 @@
 <!-- ═══════════════════════════════════════════════ GOALS PANEL -->
 <div id="goals-panel">
   <div class="goals-header">
-    <button class="history-back-btn" onclick="closeGoalsPanel()">← Back to Chat</button>
-    <div class="goals-title">Edit Goals</div>
-    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="history-back-btn" onclick="closeGoalsPanel()">← Back</button>
+    <div class="goals-title">Profile &amp; Goals</div>
+    <button class="hamburger-btn" onclick="openDrawer()">☰</button>
   </div>
   <div class="goals-body">
     <div class="goals-section-label">The Basics</div>
@@ -2007,9 +2136,9 @@
 <!-- ══════════════════════════════════════════════ PROGRESS PANEL -->
 <div id="progress-panel">
   <div class="progress-header">
-    <button class="history-back-btn" onclick="closeProgressPanel()">← Back to Chat</button>
+    <button class="history-back-btn" onclick="closeProgressPanel()">← Back</button>
     <div class="progress-title">Your Progress</div>
-    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="hamburger-btn" onclick="openDrawer()">☰</button>
   </div>
   <div class="progress-body" id="progress-body">
     <div class="resources-empty">Loading your progress…</div>
@@ -2019,9 +2148,9 @@
 <!-- ══════════════════════════════════════════════ RESOURCES PANEL -->
 <div id="resources-panel">
   <div class="resources-header">
-    <button class="history-back-btn" onclick="closeResourcesPanel()">← Back to Chat</button>
+    <button class="history-back-btn" onclick="closeResourcesPanel()">← Back</button>
     <div class="resources-title">Resource Library</div>
-    <button class="icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    <button class="hamburger-btn" onclick="openDrawer()">☰</button>
   </div>
   <div class="resources-toolbar">
     <div class="resources-tag-bar" id="resources-tag-bar"></div>
@@ -2131,8 +2260,15 @@
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('futureMeTheme', theme);
     const icon = theme === 'dark' ? '🌙' : '☀️';
-    document.querySelectorAll('.theme-toggle')
-      .forEach(btn => btn.textContent = icon);
+    document.querySelectorAll('.theme-toggle').forEach(btn => btn.textContent = icon);
+    const drawerIcon = document.getElementById('drawer-theme-icon');
+    const drawerLabel = document.getElementById('drawer-theme-label');
+    if (drawerIcon) drawerIcon.textContent = icon;
+    if (drawerLabel) drawerLabel.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+  }
+
+  function toggleThemeFromDrawer() {
+    toggleTheme();
   }
 
   // ── PASSWORD GATE ───────────────────────────────────────────
@@ -2901,6 +3037,82 @@
     alert(`Your sync code:\n\n${code}\n\nEnter this on any other device to access your data.`);
   }
 
+  // ── NAV DRAWER ───────────────────────────────────────────────
+
+  function openDrawer() {
+    document.getElementById('nav-drawer').classList.add('open');
+    document.getElementById('drawer-overlay').classList.add('open');
+  }
+
+  function closeDrawer() {
+    document.getElementById('nav-drawer').classList.remove('open');
+    document.getElementById('drawer-overlay').classList.remove('open');
+  }
+
+  function goHome() {
+    closeDrawer();
+    // Close any open panels
+    document.getElementById('history-panel').style.display = 'none';
+    document.getElementById('goals-panel').style.display = 'none';
+    document.getElementById('progress-panel').style.display = 'none';
+    document.getElementById('resources-panel').style.display = 'none';
+    showHomeScreen();
+  }
+
+  async function selectAreaFromDrawer(areaId) {
+    closeDrawer();
+    const chatVisible = document.getElementById('chat-screen').style.display !== 'none';
+    if (chatVisible) {
+      if (!confirm('Start a new session? Your current conversation will be saved.')) return;
+      saveCurrentSession();
+      saveToHistory();
+      clearActiveConversation();
+      conversationHistory = [];
+      currentSessionId = null;
+      document.getElementById('messages').innerHTML = '';
+      document.getElementById('chat-screen').style.display = 'none';
+    }
+    // Close any open panels
+    document.getElementById('history-panel').style.display = 'none';
+    document.getElementById('goals-panel').style.display = 'none';
+    document.getElementById('progress-panel').style.display = 'none';
+    document.getElementById('resources-panel').style.display = 'none';
+    currentArea = areaId;
+    localStorage.setItem('futureMeLastArea', areaId);
+    const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
+    if (saved['name'] && saved['goal']) {
+      await launch();
+    } else {
+      document.getElementById('home-screen').style.display = 'none';
+      document.getElementById('setup-theme-btn').style.display = 'flex';
+      document.getElementById('setup-screen').style.display = 'block';
+    }
+  }
+
+  function openGoalsPanelFromNav() {
+    Object.entries(GOALS_MAP).forEach(([gId, setupId]) => {
+      const src = document.getElementById(setupId);
+      const dst = document.getElementById(gId);
+      if (src && dst) dst.value = src.value;
+    });
+    document.getElementById('goals-save-status').textContent = '';
+    document.getElementById('goals-panel').style.display = 'flex';
+  }
+
+  async function startFromHome(text) {
+    currentArea = null;
+    const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
+    if (saved['name'] && saved['goal']) {
+      await launch();
+      document.getElementById('chat-input').value = text;
+      sendMessage();
+    } else {
+      document.getElementById('home-screen').style.display = 'none';
+      document.getElementById('setup-theme-btn').style.display = 'flex';
+      document.getElementById('setup-screen').style.display = 'block';
+    }
+  }
+
   // ── HOME SCREEN ─────────────────────────────────────────────
 
   function getLabelForArea(id) {
@@ -2908,39 +3120,18 @@
     return area ? area.label : id;
   }
 
-  function renderHomeScreen() {
-    const track = document.getElementById('carousel-track');
-    const dots  = document.getElementById('carousel-dots');
-
-    track.innerHTML = LIFE_AREAS.map((area, i) => `
-      <div class="area-card" style="background:${area.bg}" onclick="selectArea('${area.id}')" data-index="${i}">
-        <div class="area-card-icon">${area.icon}</div>
-        <div class="area-card-name">${area.label}</div>
-        <div class="area-card-tagline">${area.tagline}</div>
-        <div class="area-card-cta">Start a session →</div>
-      </div>`).join('');
-
-    dots.innerHTML = LIFE_AREAS.map((_, i) =>
-      `<div class="carousel-dot${i === 0 ? ' active' : ''}" id="cdot-${i}"></div>`
-    ).join('');
-
-    let scrollTimer;
-    track.addEventListener('scroll', () => {
-      clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(updateCarouselDots, 60);
-    });
-  }
-
-  function updateCarouselDots() {
-    const track = document.getElementById('carousel-track');
-    if (!track) return;
-    const center = track.getBoundingClientRect().left + track.getBoundingClientRect().width / 2;
-    let closest = 0, minDist = Infinity;
-    track.querySelectorAll('.area-card').forEach((card, i) => {
-      const dist = Math.abs(card.getBoundingClientRect().left + card.getBoundingClientRect().width / 2 - center);
-      if (dist < minDist) { minDist = dist; closest = i; }
-    });
-    document.querySelectorAll('.carousel-dot').forEach((dot, i) => dot.classList.toggle('active', i === closest));
+  function renderAreasGrid() {
+    const grid = document.getElementById('areas-grid');
+    grid.innerHTML = LIFE_AREAS.map(area => {
+      const shortLabel = area.label.split(' ')[0].toUpperCase();
+      return `
+        <div class="area-grid-card" onclick="selectArea('${area.id}')">
+          <div class="area-grid-label">${shortLabel}</div>
+          <div class="area-grid-icon">${area.icon}</div>
+          <div class="area-grid-name">${area.label}</div>
+          <div class="area-grid-tagline">${area.tagline}</div>
+        </div>`;
+    }).join('');
   }
 
   function showHomeScreen() {
@@ -2960,12 +3151,7 @@
     document.getElementById('chat-screen').style.display = 'none';
     document.getElementById('home-screen').style.display = 'flex';
 
-    // Sync theme icon in home footer
-    const theme = document.documentElement.getAttribute('data-theme');
-    const homeIcon = document.getElementById('home-theme-icon');
-    if (homeIcon) homeIcon.textContent = theme === 'dark' ? '🌙' : '☀️';
-
-    renderHomeScreen();
+    renderAreasGrid();
   }
 
   function selectArea(areaId) {
@@ -3537,7 +3723,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
 
     document.getElementById('chat-name').textContent = coachName;
     document.getElementById('chat-avatar').textContent = userName.charAt(0).toUpperCase();
-    document.getElementById('chat-sub').textContent = `● ${getLabelForArea(currentArea)}`;
+    document.getElementById('chat-sub').textContent = currentArea ? `● ${getLabelForArea(currentArea)}` : '● Ready to coach you';
     document.getElementById('setup-screen').style.display = 'none';
     document.getElementById('setup-theme-btn').style.display = 'none';
     document.getElementById('home-screen').style.display = 'none';

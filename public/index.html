@@ -310,6 +310,7 @@
       max-width: 720px;
       height: 100vh;
       max-height: 100vh;
+      position: relative;
     }
 
     .chat-header {
@@ -362,6 +363,96 @@
       flex-direction: column;
       gap: 20px;
       scroll-behavior: smooth;
+      position: relative;
+    }
+
+    #chat-greeting {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      background: var(--bg);
+      z-index: 10;
+      padding: 40px 24px;
+      animation: fadeIn 0.35s ease;
+    }
+    #chat-greeting.hidden { display: none; }
+    .greeting-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+    .greeting-sparkle {
+      font-size: 36px;
+      background: linear-gradient(135deg, #F7CACD, #E36497);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .greeting-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(26px, 5vw, 38px);
+      color: var(--text);
+      text-align: center;
+      line-height: 1.2;
+    }
+    .greeting-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .greeting-input-wrap {
+      width: 100%;
+      max-width: 560px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 12px 12px 16px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .greeting-input-wrap textarea {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      resize: none;
+      line-height: 1.5;
+      max-height: 100px;
+      min-height: 24px;
+    }
+    .greeting-input-wrap textarea::placeholder { color: var(--text-muted); }
+    .greeting-send-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+    .greeting-send-btn:hover { opacity: 0.85; }
+    .greeting-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 560px;
     }
 
     .messages-area::-webkit-scrollbar { width: 4px; }
@@ -1774,6 +1865,7 @@
     <button class="nav-item" onclick="selectAreaFromDrawer('networking')"><span class="nav-item-icon">🤝</span>Networking &amp; Community</button>
     <div class="drawer-divider"></div>
     <div class="drawer-section">Navigate</div>
+    <button class="nav-item" onclick="goHome()"><span class="nav-item-icon">🏠</span>Home</button>
     <button class="nav-item" onclick="closeDrawer();openHistory()"><span class="nav-item-icon">🕐</span>History</button>
     <button class="nav-item" onclick="closeDrawer();openProgressPanel()"><span class="nav-item-icon">📊</span>Progress</button>
     <button class="nav-item" onclick="closeDrawer();openResourcesPanel()"><span class="nav-item-icon">📚</span>Resources</button>
@@ -1979,6 +2071,23 @@
     </div>
   </div>
 
+  <div id="chat-greeting" class="hidden">
+    <div class="greeting-content">
+      <div class="greeting-sparkle">✦</div>
+      <div class="greeting-title" id="greeting-title">Good afternoon</div>
+      <div class="greeting-sub" id="greeting-sub">What's on your mind?</div>
+    </div>
+    <div class="greeting-input-wrap">
+      <textarea id="greeting-input" rows="1" placeholder="Talk to your future self…" onkeydown="handleGreetingKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="greeting-send-btn" onclick="submitGreetingInput()">↑</button>
+    </div>
+    <div class="greeting-chips-row">
+      <button class="quick-btn" onclick="greetingQuick('What should I focus on today?')">Focus for today</button>
+      <button class="quick-btn" onclick="greetingQuick('Am I on track for my goal?')">Am I on track?</button>
+      <button class="quick-btn" onclick="greetingQuick('I need some motivation right now.')">I need motivation</button>
+      <button class="quick-btn" onclick="greetingQuick('I\'m feeling stuck. What\'s one thing I can do in the next 30 minutes?')">I\'m feeling stuck</button>
+    </div>
+  </div>
   <div class="messages-area" id="messages"></div>
   <div id="error-area"></div>
 
@@ -2960,6 +3069,7 @@
     document.getElementById('chat-sub').textContent = currentArea ? `● ${getLabelForArea(currentArea)}` : '● Ready to coach you';
     document.getElementById('chat-screen').style.display = 'flex';
 
+    dismissGreeting();
     document.getElementById('messages').innerHTML = '';
     conversationHistory
       .filter(m => !m.content.startsWith('Hello! Introduce yourself'))
@@ -3154,13 +3264,15 @@
     renderAreasGrid();
   }
 
-  function selectArea(areaId) {
+  async function selectArea(areaId) {
+    saveCurrentSession();
+    saveToHistory();
     currentArea = areaId;
     localStorage.setItem('futureMeLastArea', areaId);
     const saved = JSON.parse(localStorage.getItem('futureMeSetup') || '{}');
     document.getElementById('home-screen').style.display = 'none';
     if (saved['name'] && saved['goal']) {
-      launch();
+      await launch();
     } else {
       document.getElementById('setup-theme-btn').style.display = 'flex';
       document.getElementById('setup-screen').style.display = 'block';
@@ -3701,8 +3813,7 @@ FORMATTING RULES:
 - Bold (**like this**) key action items or important reminders
 - Keep responses focused — don't overwhelm with walls of text
 - Use a conversational, flowing tone — not bullet points unless listing tasks
-
-Always open your first message by greeting ${userName} warmly, introducing yourself as ${coachName}, and asking what they need today. Make them feel immediately seen and supported.${buildMemoryContext()}${buildPatternsContext()}${buildPinnedResourcesContext()}`;
+${buildMemoryContext()}${buildPatternsContext()}${buildPinnedResourcesContext()}`;
   }
 
   // ── CHAT ────────────────────────────────────────────────────
@@ -3712,6 +3823,8 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     coachName = document.getElementById('coach-name').value.trim() || `Future ${userName}`;
     currentSessionId = Date.now();
     clearActiveConversation();
+    conversationHistory = [];
+    document.getElementById('messages').innerHTML = '';
 
     // Fetch all context in parallel before building the system prompt.
     [recentSummaries] = await Promise.all([
@@ -3730,11 +3843,38 @@ Always open your first message by greeting ${userName} warmly, introducing yours
     document.getElementById('chat-screen').style.display = 'flex';
 
     supabaseSessionId = await createSupabaseSession();
-    sendOpeningMessage();
+
+    const hour = new Date().getHours();
+    const tod = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+    document.getElementById('greeting-title').textContent = `Good ${tod}, ${userName}`;
+    const areaLabel = currentArea ? getLabelForArea(currentArea) : null;
+    document.getElementById('greeting-sub').textContent = areaLabel ? areaLabel : `I'm ${coachName} · What's on your mind?`;
+    document.getElementById('chat-greeting').classList.remove('hidden');
   }
 
-  async function sendOpeningMessage() {
-    await sendToAPI("Hello! Introduce yourself and ask me what I need today.", true, null);
+  function dismissGreeting() {
+    document.getElementById('chat-greeting').classList.add('hidden');
+    const gi = document.getElementById('greeting-input');
+    if (gi) { gi.value = ''; gi.style.height = 'auto'; }
+  }
+
+  function handleGreetingKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitGreetingInput(); }
+  }
+
+  function submitGreetingInput() {
+    const gi = document.getElementById('greeting-input');
+    const text = gi.value.trim();
+    if (!text) return;
+    gi.value = '';
+    gi.style.height = 'auto';
+    document.getElementById('chat-input').value = text;
+    sendMessage();
+  }
+
+  function greetingQuick(text) {
+    document.getElementById('chat-input').value = text;
+    sendMessage();
   }
 
   // ── ATTACHMENTS ─────────────────────────────────────────────
@@ -3866,6 +4006,7 @@ Always open your first message by greeting ${userName} warmly, introducing yours
   }
 
   async function sendMessage() {
+    dismissGreeting();
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
     if (!text && !pendingAttachment) return;

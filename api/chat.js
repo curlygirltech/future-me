@@ -36,7 +36,9 @@ export default async function handler(req, res) {
     const isLastUser = i === messages.length - 1 && msg.role === 'user';
     if (!isLastUser) return msg;
     const content = Array.isArray(msg.content)
-      ? [...msg.content, { type: 'text', text: '', cache_control: { type: 'ephemeral' } }]
+      ? msg.content.map((block, j) =>
+          j === msg.content.length - 1 ? { ...block, cache_control: { type: 'ephemeral' } } : block
+        )
       : [{ type: 'text', text: msg.content, cache_control: { type: 'ephemeral' } }];
     return { ...msg, content };
   });
